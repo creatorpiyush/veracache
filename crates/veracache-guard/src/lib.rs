@@ -4,13 +4,15 @@
 #![warn(missing_docs)]
 
 mod analyzer;
+mod number;
 
 use std::sync::Arc;
 
 pub use analyzer::EnglishAnalyzer;
+pub use number::NumberGuard;
 use veracache_core::Guard;
 
 /// The guards every cache runs unless configured otherwise.
 pub fn default_guards() -> Vec<Arc<dyn Guard>> {
-    Vec::new()
+    vec![Arc::new(NumberGuard)]
 }

@@ -10,3 +10,6 @@ repository.workspace = true
 
 [dependencies]
 veracache-core.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true

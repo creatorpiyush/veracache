@@ -1,5 +1,7 @@
 use veracache_core::{Analyzed, Analyzer, Result};
 
+use crate::number::extract_numbers;
+
 const FEATURE_VERSION: u32 = 1;
 
 /// Extracts guard features from English prompts.
@@ -15,6 +17,7 @@ impl Analyzer for EnglishAnalyzer {
         Ok(Analyzed {
             text: text.to_owned(),
             feature_version: FEATURE_VERSION,
+            numbers: extract_numbers(text),
             ..Analyzed::default()
         })
     }
