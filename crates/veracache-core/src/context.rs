@@ -134,4 +134,49 @@ mod tests {
             context_fingerprint(&other, mode)
         );
     }
+
+    #[test]
+    fn system_messages_do_not_count_as_turns() {
+        let messages = [
+            msg("developer", "be brief"),
+            msg("user", "hello"),
+            msg("system", "late instruction"),
+        ];
+        assert_eq!(
+            context_fingerprint(&messages, ContextMode::SingleTurn),
+            context_fingerprint(&[msg("user", "hi")], ContextMode::SingleTurn),
+        );
+    }
+
+    #[test]
+    fn only_system_messages_cannot_be_cached() {
+        let messages = [msg("system", "be brief")];
+        assert_eq!(
+            context_fingerprint(&messages, ContextMode::SingleTurn),
+            None
+        );
+    }
+
+    #[test]
+    fn window_ignores_turns_older_than_n() {
+        let mut older = follow_up();
+        older.insert(0, msg("user", "much earlier"));
+        older.insert(1, msg("assistant", "ok"));
+        let mode = ContextMode::LastNTurns(2);
+        assert_eq!(
+            context_fingerprint(&follow_up(), mode),
+            context_fingerprint(&older, mode)
+        );
+    }
+
+    #[test]
+    fn message_boundaries_change_the_fingerprint() {
+        let mode = ContextMode::LastNTurns(4);
+        let one = [msg("user", "ab"), msg("assistant", "c"), msg("user", "q")];
+        let two = [msg("user", "a"), msg("assistant", "bc"), msg("user", "q")];
+        assert_ne!(
+            context_fingerprint(&one, mode),
+            context_fingerprint(&two, mode)
+        );
+    }
 }
