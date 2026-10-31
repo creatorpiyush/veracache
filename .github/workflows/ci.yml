@@ -37,6 +37,16 @@ jobs:
       # The explicit toolchain overrides rust-toolchain.toml.
       - run: cargo +1.92 check --workspace
 
+  # Reports numbers in the job log. Never blocks.
+  bench:
+    if: github.event_name == 'push'
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: Swatinem/rust-cache@v2.9.3
+      - run: cargo bench -p veracache --bench lookup
+
   deny:
     runs-on: ubuntu-latest
     steps:
