@@ -10,6 +10,7 @@ repository.workspace = true
 
 [dependencies]
 async-trait.workspace = true
+usearch.workspace = true
 veracache-core.workspace = true
 
 [dev-dependencies]
