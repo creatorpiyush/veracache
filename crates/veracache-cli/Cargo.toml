@@ -1,0 +1,18 @@
+[package]
+name = "veracache-cli"
+description = "The veracache command-line tool"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "veracache"
+path = "src/main.rs"
+doc = false
+
+[dependencies]
+veracache-eval.workspace = true
+veracache-proxy.workspace = true
