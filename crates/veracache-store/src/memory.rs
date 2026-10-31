@@ -63,12 +63,11 @@ impl VectorStore for MemoryStore {
         let mut state = self.write()?;
         let key = (entry.namespace, entry.key_hash);
 
-        if let Some(previous) = state.ids.insert(entry.id, key) {
-            if previous != key {
-                if let Some(entries) = state.namespaces.get_mut(&previous.0) {
-                    entries.remove(&previous.1);
-                }
-            }
+        if let Some(previous) = state.ids.insert(entry.id, key)
+            && previous != key
+            && let Some(entries) = state.namespaces.get_mut(&previous.0)
+        {
+            entries.remove(&previous.1);
         }
 
         let id = entry.id;
@@ -77,10 +76,10 @@ impl VectorStore for MemoryStore {
             .entry(entry.namespace)
             .or_default()
             .insert(entry.key_hash, entry);
-        if let Some(old) = replaced {
-            if old.id != id {
-                state.ids.remove(&old.id);
-            }
+        if let Some(old) = replaced
+            && old.id != id
+        {
+            state.ids.remove(&old.id);
         }
         Ok(())
     }
