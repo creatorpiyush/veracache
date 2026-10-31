@@ -33,6 +33,9 @@ pub trait VectorStore: Send + Sync {
 
 /// Extracts guard features from a prompt.
 pub trait Analyzer: Send + Sync {
+    /// Version of the extraction rules. Bump it when features change, so
+    /// entries analyzed by older rules are rejected instead of misread.
+    fn feature_version(&self) -> u32;
     /// Analyzes one prompt.
     fn analyze(&self, text: &str) -> Result<Analyzed>;
 }
