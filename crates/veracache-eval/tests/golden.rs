@@ -3,7 +3,8 @@
 use std::collections::{HashMap, HashSet};
 
 use serde_json::Value;
-use veracache_eval::{Counts, Pair, Split, load_pairs, load_scores};
+use veracache::{EnglishAnalyzer, default_guards};
+use veracache_eval::{Counts, Pair, Split, load_pairs, load_scores, serves};
 
 const DATASETS: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../eval/datasets");
 
@@ -58,6 +59,31 @@ fn threshold_only_baseline_is_pinned() {
     assert_eq!(counts.false_hits, 36);
     assert_eq!(counts.correct_hits, 72);
     assert_eq!(counts.should_hit, 80);
+}
+
+/// Tuning-split outcomes for one category, with and without guards, at 0.90.
+fn tuning_counts(category: &str) -> (Counts, Counts) {
+    let pairs = loaded();
+    let scores = load_scores(scores_path(), &pairs).unwrap();
+    let guards = default_guards();
+    let (mut plain, mut guarded) = (Counts::default(), Counts::default());
+    for pair in &pairs {
+        if pair.split == Split::Tuning && pair.category == category {
+            let score = scores[&pair.id];
+            plain.record(pair.label, score >= 0.90);
+            let served = serves(pair, score, 0.90, &EnglishAnalyzer, &guards);
+            guarded.record(pair.label, served);
+        }
+    }
+    (plain, guarded)
+}
+
+#[test]
+fn number_guard_stops_number_false_hits_and_keeps_true_hits() {
+    let (plain, guarded) = tuning_counts("number");
+    assert!(plain.false_hits > 0);
+    assert_eq!(guarded.false_hits, 0);
+    assert_eq!(guarded.correct_hits, plain.correct_hits);
 }
 
 const CATEGORIES: [&str; 8] = [

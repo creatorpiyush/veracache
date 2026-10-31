@@ -7,7 +7,10 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::path::Path;
 
+use std::sync::Arc;
+
 use serde_json::Value;
+use veracache::{Analyzer, Guard, normalize};
 
 /// Error type for loading evaluation data.
 pub type LoadError = Box<dyn Error + Send + Sync>;
@@ -172,6 +175,32 @@ impl Counts {
     pub fn hit_recall(&self) -> Option<f32> {
         (self.should_hit > 0).then(|| self.correct_hits as f32 / self.should_hit as f32)
     }
+}
+
+/// Decides if the guarded cache would serve `pair`, given its similarity score.
+///
+/// Different histories mean different namespaces, so those pairs never hit.
+/// A prompt the analyzer cannot read is a miss, as in the pipeline.
+pub fn serves(
+    pair: &Pair,
+    score: f32,
+    threshold: f32,
+    analyzer: &dyn Analyzer,
+    guards: &[Arc<dyn Guard>],
+) -> bool {
+    if score < threshold || pair.a_history != pair.b_history {
+        return false;
+    }
+    let analyzed = (
+        analyzer.analyze(&normalize(&pair.a)),
+        analyzer.analyze(&normalize(&pair.b)),
+    );
+    let (Ok(stored), Ok(query)) = analyzed else {
+        return false;
+    };
+    guards
+        .iter()
+        .all(|guard| guard.check(&query, &stored).is_ok())
 }
 
 #[cfg(test)]

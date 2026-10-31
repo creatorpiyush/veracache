@@ -6,8 +6,9 @@ use serde_json::Value;
 
 use crate::context::is_system;
 use crate::{
-    CacheEntry, ChatMessage, ContextMode, Embedder, EntryId, EntryStats, Error, Namespace,
-    NamespaceParts, ResponseMeta, Result, VectorStore, context_fingerprint, key_hash, normalize,
+    Analyzed, Analyzer, CacheEntry, ChatMessage, ContextMode, Embedder, EntryId, EntryStats, Error,
+    Guard, Namespace, NamespaceParts, ResponseMeta, Result, VectorStore, context_fingerprint,
+    key_hash, normalize,
 };
 
 /// Lookup settings.
@@ -80,6 +81,8 @@ struct Key {
 pub struct Cache {
     embedder: Arc<dyn Embedder>,
     store: Arc<dyn VectorStore>,
+    analyzer: Arc<dyn Analyzer>,
+    guards: Vec<Arc<dyn Guard>>,
     config: CacheConfig,
     errors: AtomicU64,
 }
@@ -89,11 +92,15 @@ impl Cache {
     pub fn new(
         embedder: Arc<dyn Embedder>,
         store: Arc<dyn VectorStore>,
+        analyzer: Arc<dyn Analyzer>,
+        guards: Vec<Arc<dyn Guard>>,
         config: CacheConfig,
     ) -> Self {
         Self {
             embedder,
             store,
+            analyzer,
+            guards,
             config,
             errors: AtomicU64::new(0),
         }
@@ -175,6 +182,7 @@ impl Cache {
             }));
         }
 
+        let query = self.analyzer.analyze(&key.normalized)?;
         let vector = self.embed(&key.normalized).await?;
         let candidates = self
             .store
@@ -182,12 +190,25 @@ impl Cache {
             .await?;
         Ok(candidates
             .into_iter()
-            .find(|candidate| candidate.score >= self.config.threshold)
+            .filter(|candidate| candidate.score >= self.config.threshold)
+            .find(|candidate| self.is_safe(&query, &candidate.entry))
             .map(|candidate| Hit {
                 entry: candidate.entry,
                 score: candidate.score,
                 exact: false,
             }))
+    }
+
+    // A candidate that cannot be checked is rejected, never assumed safe.
+    fn is_safe(&self, query: &Analyzed, entry: &CacheEntry) -> bool {
+        let Some(features) = &entry.analyzed else {
+            return false;
+        };
+        features.feature_version == self.analyzer.feature_version()
+            && self
+                .guards
+                .iter()
+                .all(|guard| guard.check(query, features).is_ok())
     }
 
     async fn store_entry(
@@ -197,6 +218,7 @@ impl Cache {
         response_meta: ResponseMeta,
         options: SetOptions,
     ) -> Result<()> {
+        let analyzed = self.analyzer.analyze(&key.normalized)?;
         let embedding = self.embed(&key.normalized).await?;
         self.store
             .upsert(CacheEntry {
@@ -204,7 +226,7 @@ impl Cache {
                 namespace: key.namespace,
                 key_hash: key.key_hash,
                 prompt_text: Some(key.normalized),
-                analyzed: None,
+                analyzed: Some(analyzed),
                 embedding,
                 response,
                 response_meta,
@@ -249,12 +271,13 @@ fn entry_id(key: &Key) -> EntryId {
 #[cfg(test)]
 mod tests {
     use std::sync::Mutex;
+    use std::sync::atomic::{AtomicBool, AtomicU32};
 
     use async_trait::async_trait;
     use serde_json::json;
 
     use super::*;
-    use crate::{Candidate, DeleteFilter, Feedback};
+    use crate::{Candidate, DeleteFilter, Feedback, RejectReason};
 
     #[derive(Default)]
     struct FakeEmbedder {
@@ -337,22 +360,98 @@ mod tests {
         }
     }
 
+    #[derive(Default)]
+    struct FakeAnalyzer {
+        calls: AtomicU64,
+        failing: AtomicBool,
+        version: AtomicU32,
+    }
+
+    impl Analyzer for FakeAnalyzer {
+        fn feature_version(&self) -> u32 {
+            self.version.load(Ordering::SeqCst)
+        }
+
+        fn analyze(&self, text: &str) -> Result<Analyzed> {
+            self.calls.fetch_add(1, Ordering::SeqCst);
+            if self.failing.load(Ordering::SeqCst) {
+                return Err(Error::Analyze("broken".into()));
+            }
+            Ok(Analyzed {
+                text: text.into(),
+                feature_version: self.feature_version(),
+                ..Analyzed::default()
+            })
+        }
+    }
+
+    /// Vetoes candidates whose text contains `word`, and records its calls.
+    struct VetoWord {
+        word: &'static str,
+        seen: Mutex<Vec<(String, String)>>,
+    }
+
+    impl VetoWord {
+        fn new(word: &'static str) -> Arc<Self> {
+            Arc::new(Self {
+                word,
+                seen: Mutex::default(),
+            })
+        }
+    }
+
+    impl Guard for VetoWord {
+        fn name(&self) -> &'static str {
+            "veto_word"
+        }
+
+        fn check(
+            &self,
+            query: &Analyzed,
+            candidate: &Analyzed,
+        ) -> std::result::Result<(), RejectReason> {
+            let pair = (query.text.clone(), candidate.text.clone());
+            self.seen.lock().unwrap().push(pair);
+            if candidate.text.contains(self.word) {
+                return Err(RejectReason::new(self.name(), self.word));
+            }
+            Ok(())
+        }
+    }
+
     struct Harness {
         cache: Cache,
         embedder: Arc<FakeEmbedder>,
         store: Arc<FakeStore>,
+        analyzer: Arc<FakeAnalyzer>,
     }
 
     impl Harness {
         fn new(config: CacheConfig) -> Self {
+            Self::guarded(config, Vec::new())
+        }
+
+        fn guarded(config: CacheConfig, guards: Vec<Arc<dyn Guard>>) -> Self {
             let embedder = Arc::new(FakeEmbedder::default());
             let store = Arc::new(FakeStore::default());
-            let cache = Cache::new(embedder.clone(), store.clone(), config);
+            let analyzer = Arc::new(FakeAnalyzer::default());
+            let cache = Cache::new(
+                embedder.clone(),
+                store.clone(),
+                analyzer.clone(),
+                guards,
+                config,
+            );
             Self {
                 cache,
                 embedder,
                 store,
+                analyzer,
             }
+        }
+
+        fn analyze_calls(&self) -> u64 {
+            self.analyzer.calls.load(Ordering::SeqCst)
         }
 
         fn embed_calls(&self) -> u64 {
@@ -630,6 +729,151 @@ mod tests {
 
         let entry = harness.store.only_entry();
         assert_eq!(entry.prompt_text.as_deref(), Some("the question"));
+    }
+
+    fn loose() -> CacheConfig {
+        CacheConfig {
+            threshold: 0.5,
+            ..CacheConfig::default()
+        }
+    }
+
+    async fn stored_with_score(harness: &Harness, prompts: &[&str]) {
+        *harness.store.score.lock().unwrap() = 0.9;
+        for prompt in prompts {
+            let messages = [msg("user", prompt)];
+            harness.set(&request(&messages)).await;
+        }
+    }
+
+    #[tokio::test]
+    async fn set_stores_analyzed_features() {
+        let harness = Harness::new(CacheConfig::default());
+        harness.analyzer.version.store(3, Ordering::SeqCst);
+        let messages = [msg("user", "  hello\n world ")];
+        harness.set(&request(&messages)).await;
+
+        let analyzed = harness.store.only_entry().analyzed.unwrap();
+        assert_eq!(analyzed.text, "hello world");
+        assert_eq!(analyzed.feature_version, 3);
+    }
+
+    #[tokio::test]
+    async fn a_candidate_passing_all_guards_is_a_hit() {
+        let harness = Harness::guarded(loose(), vec![VetoWord::new("x"), VetoWord::new("y")]);
+        stored_with_score(&harness, &["stored"]).await;
+
+        let query = [msg("user", "query")];
+        assert!(harness.cache.get(&request(&query)).await.is_some());
+    }
+
+    #[tokio::test]
+    async fn one_veto_rejects_the_candidate() {
+        let pass = VetoWord::new("nothing");
+        let veto = VetoWord::new("stored");
+        let harness = Harness::guarded(loose(), vec![pass, veto]);
+        stored_with_score(&harness, &["stored"]).await;
+
+        let query = [msg("user", "query")];
+        assert_eq!(harness.cache.get(&request(&query)).await, None);
+        assert_eq!(harness.cache.error_count(), 0);
+    }
+
+    #[tokio::test]
+    async fn a_veto_moves_on_to_the_next_candidate() {
+        let harness = Harness::guarded(loose(), vec![VetoWord::new("blocked")]);
+        stored_with_score(&harness, &["blocked one", "safe two"]).await;
+
+        let query = [msg("user", "query")];
+        let hit = harness.cache.get(&request(&query)).await.unwrap();
+        assert_eq!(hit.entry.prompt_text.as_deref(), Some("safe two"));
+    }
+
+    #[tokio::test]
+    async fn guards_see_the_query_and_candidate_features() {
+        let guard = VetoWord::new("nothing");
+        let harness = Harness::guarded(loose(), vec![guard.clone()]);
+        stored_with_score(&harness, &["stored"]).await;
+
+        let query = [msg("user", "query")];
+        harness.cache.get(&request(&query)).await;
+
+        let seen = guard.seen.lock().unwrap();
+        assert_eq!(*seen, [("query".to_string(), "stored".to_string())]);
+    }
+
+    #[tokio::test]
+    async fn candidates_below_threshold_are_not_guarded() {
+        let guard = VetoWord::new("nothing");
+        let harness = Harness::guarded(loose(), vec![guard.clone()]);
+        stored_with_score(&harness, &["stored"]).await;
+        *harness.store.score.lock().unwrap() = 0.1;
+
+        let query = [msg("user", "query")];
+        assert_eq!(harness.cache.get(&request(&query)).await, None);
+        assert!(guard.seen.lock().unwrap().is_empty());
+    }
+
+    #[tokio::test]
+    async fn exact_hits_skip_analysis_and_guards() {
+        let guard = VetoWord::new("stored");
+        let harness = Harness::guarded(loose(), vec![guard.clone()]);
+        stored_with_score(&harness, &["stored"]).await;
+        let analyzed = harness.analyze_calls();
+
+        let same = [msg("user", "stored")];
+        let hit = harness.cache.get(&request(&same)).await.unwrap();
+
+        assert!(hit.exact);
+        assert_eq!(harness.analyze_calls(), analyzed);
+        assert!(guard.seen.lock().unwrap().is_empty());
+    }
+
+    #[tokio::test]
+    async fn query_analyzer_failure_is_a_counted_miss() {
+        let harness = Harness::guarded(loose(), Vec::new());
+        stored_with_score(&harness, &["stored"]).await;
+        let embeds = harness.embed_calls();
+
+        harness.analyzer.failing.store(true, Ordering::SeqCst);
+        let query = [msg("user", "query")];
+
+        assert_eq!(harness.cache.get(&request(&query)).await, None);
+        assert_eq!(harness.cache.error_count(), 1);
+        assert_eq!(harness.embed_calls(), embeds);
+    }
+
+    #[tokio::test]
+    async fn store_analyzer_failure_stores_nothing() {
+        let harness = Harness::new(CacheConfig::default());
+        harness.analyzer.failing.store(true, Ordering::SeqCst);
+        let messages = [msg("user", "hello")];
+
+        harness.set(&request(&messages)).await;
+
+        assert!(harness.store.entries.lock().unwrap().is_empty());
+        assert_eq!(harness.cache.error_count(), 1);
+    }
+
+    #[tokio::test]
+    async fn candidate_without_features_is_rejected() {
+        let harness = Harness::guarded(loose(), Vec::new());
+        stored_with_score(&harness, &["stored"]).await;
+        harness.store.entries.lock().unwrap()[0].analyzed = None;
+
+        let query = [msg("user", "query")];
+        assert_eq!(harness.cache.get(&request(&query)).await, None);
+    }
+
+    #[tokio::test]
+    async fn candidate_with_old_feature_version_is_rejected() {
+        let harness = Harness::guarded(loose(), Vec::new());
+        stored_with_score(&harness, &["stored"]).await;
+
+        harness.analyzer.version.store(1, Ordering::SeqCst);
+
+        let query = [msg("user", "query")];
+        assert_eq!(harness.cache.get(&request(&query)).await, None);
     }
 
     #[tokio::test]

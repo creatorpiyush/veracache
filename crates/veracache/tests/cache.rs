@@ -8,8 +8,8 @@ use async_trait::async_trait;
 use serde_json::Value;
 use veracache::{
     Cache, CacheConfig, CacheEntry, CacheRequest, Candidate, ChatMessage, ContextMode,
-    DeleteFilter, Embedder, EntryId, Error, Feedback, Namespace, ResponseMeta, Result, SetOptions,
-    VectorStore, memory_cache,
+    DeleteFilter, Embedder, EnglishAnalyzer, EntryId, Error, Feedback, Namespace, ResponseMeta,
+    Result, SetOptions, VectorStore, default_guards, memory_cache,
 };
 
 /// Maps known prompts to fixed vectors.
@@ -260,6 +260,8 @@ async fn store_failure_is_a_counted_miss() {
     let cache = Cache::new(
         FakeEmbedder::new(),
         Arc::new(FailingStore),
+        Arc::new(EnglishAnalyzer),
+        default_guards(),
         CacheConfig::default(),
     );
     let messages = user(FRANCE);

@@ -7,9 +7,16 @@ use std::sync::Arc;
 
 pub use veracache_core::*;
 pub use veracache_embed::*;
+pub use veracache_guard::*;
 pub use veracache_store::MemoryStore;
 
-/// Creates a cache backed by an in-process store.
+/// Creates a guarded cache backed by an in-process store.
 pub fn memory_cache(embedder: Arc<dyn Embedder>, config: CacheConfig) -> Cache {
-    Cache::new(embedder, Arc::new(MemoryStore::new()), config)
+    Cache::new(
+        embedder,
+        Arc::new(MemoryStore::new()),
+        Arc::new(EnglishAnalyzer),
+        default_guards(),
+        config,
+    )
 }
