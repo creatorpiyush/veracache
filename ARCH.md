@@ -1,6 +1,6 @@
 # Architecture: veracache
 
-Status: design. Nothing here is built yet.
+Status: partly built. The lookup pipeline without guards, both embedders, and the memory store exist. Everything else here is design.
 
 ## 1. Overview
 

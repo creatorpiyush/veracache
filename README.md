@@ -2,7 +2,7 @@
 
 **A semantic cache for LLMs where a hit must be proven safe, not just similar.**
 
-> **Status: design stage. No code exists yet, and nothing here can be installed.** Everything below describes the planned v0.1.
+> **Status: early development.** The core cache works as a Rust library, but it is not published and **has no guards yet, so it can still return false hits. Do not use it for real answers.** Guards are the next milestone.
 
 ## The problem
 
@@ -30,67 +30,87 @@ request → exact match? → embed → nearest neighbours → threshold
 
 If veracache cannot show a hit is safe, it treats it as a miss. A miss costs a little money. A false hit costs trust.
 
-## Planned features
+## Works today
+
+- **Exact and semantic lookup** in a Rust library. The guard step above is not built yet.
+- **Isolation**: a hit never crosses tenant, model, embedder, system prompt, tool schema, or conversation history.
+- **Local embedding**: runs bge-small-en-v1.5 in-process, offline once the model is downloaded.
+- **Remote embedding**: any OpenAI-compatible `/embeddings` API.
+- **In-memory store**: TTL, delete by tag or version, and an HNSW index for large namespaces.
+- **Fails open**: if the store or embedder fails, the request is a miss, not an error.
+
+## Planned
 
 - **Guarded matching**, with a recorded reason for every rejected candidate.
 - **Eval CLI**: replay your own logs to get hit rate, false-hit rate, and a recommended threshold before you trust it.
 - **OpenAI-compatible proxy**: a single binary that supports streaming. Point an existing client at it.
 - **Node and Python packages**, built on the same Rust core.
-- **Local first**: runs offline with a local ONNX embedder. Remote embedding APIs are optional.
-- **Tenant isolation**: a hit never crosses tenant, model, system prompt, or tool schema.
-- **Pluggable storage**: memory, SQLite, Redis, pgvector.
+- **More storage**: SQLite, Redis, pgvector.
 
-## Planned usage
+## Try it
 
-These examples are design targets, not working code.
-
-Measure on your own logs:
+You need Rust 1.92 or newer and a C++ compiler.
 
 ```sh
-veracache eval --input prompts.jsonl --sweep 0.80:0.98:0.01
+git clone https://github.com/creatorpiyush/veracache.git
+cd veracache
+cargo run -p veracache --example paraphrase
 ```
 
-Run the proxy:
+The first run downloads the embedding model to `.fastembed_cache`. Output:
 
-```sh
-veracache serve --config veracache.toml
+```
+MISS  What is the capital of France?
+HIT   What is the capital of France? -> Paris (exact, 1.000)
+HIT   What's the capital city of France? -> Paris (semantic, 0.961)
+MISS  How do I bake sourdough bread?
 ```
 
-Use it from Node:
+See [paraphrase.rs](crates/veracache/examples/paraphrase.rs) for the API.
 
-```ts
-import { SemanticCache } from "veracache";
+### Platforms
 
-const cache = await SemanticCache.create({ store: "memory", embedder: "local", guards: "default" });
+| Target | Local embedder | Remote embedder |
+|---|---|---|
+| Linux x64 and arm64 (gnu) | Yes | Yes |
+| macOS arm64 | Yes | Yes |
+| Windows x64 | Yes | Yes |
+| Linux x64 and arm64 (musl) | No | Yes |
+| macOS x64 | No | Yes |
 
-const hit = await cache.get({ model, messages, tenant: userId });
-if (!hit) {
-  const res = await llm(model, messages);
-  await cache.set({ model, messages, tenant: userId }, res);
-}
-```
+ONNX Runtime has no prebuilt binaries for the last two rows. Build those targets with `--no-default-features` and use the remote embedder.
 
 ## Results
 
-None yet. False-hit numbers will be published here with the command that reproduces them, starting with Phase 2.
+No false-hit numbers yet. They will be published here with the command that reproduces them, once guards exist.
+
+Lookup latency at 100k entries, from `cargo bench -p veracache --bench lookup`:
+
+| Bench | Mean |
+|---|---|
+| Exact hit | 1.2µs |
+| Semantic hit | 68µs |
+
+These are early numbers from an Apple M4 Pro, with synthetic vectors, a fake embedder, and no guards. Expect semantic lookup to be slower with guards on.
 
 ## Roadmap
 
-| Phase | Delivers |
-|---|---|
-| 0 | Workspace, CI, project skeleton |
-| 1 | Core cache: exact and semantic lookup, local embedder |
-| 2 | Guard pipeline and golden test suite |
-| 3 | Eval CLI |
-| 4 | OpenAI-compatible proxy |
-| 5 | SQLite, Redis, and pgvector backends |
-| 6 | Node and Python packages |
-| 7 | Adaptive per-entry thresholds |
-| 8 | v0.1 launch |
+| Phase | Delivers | Status |
+|---|---|---|
+| 0 | Workspace, CI, project skeleton | Done |
+| 1 | Core cache: exact and semantic lookup, embedders, memory store | Done |
+| 2 | Guard pipeline and golden test suite | Next |
+| 3 | Eval CLI | Planned |
+| 4 | OpenAI-compatible proxy | Planned |
+| 5 | SQLite, Redis, and pgvector backends | Planned |
+| 6 | Node and Python packages | Planned |
+| 7 | Adaptive per-entry thresholds | Planned |
+| 8 | v0.1 launch | Planned |
 
 ## Documentation
 
 - [ARCH.md](ARCH.md): system design
+- [CONTRIBUTING.md](CONTRIBUTING.md): how to contribute
 
 ## License
 
