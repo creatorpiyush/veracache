@@ -9,4 +9,8 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
+async-trait.workspace = true
 veracache-core.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt"] }
