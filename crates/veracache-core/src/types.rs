@@ -143,3 +143,25 @@ pub struct Feedback {
     /// Whether the served response was correct.
     pub correct: bool,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn reject_reason_keeps_guard_and_detail() {
+        let reason = RejectReason::new("number", String::from("Q2 vs Q3"));
+        assert_eq!(reason.guard, "number");
+        assert_eq!(reason.detail, "Q2 vs Q3");
+        assert_eq!(reason.to_string(), "number: Q2 vs Q3");
+    }
+
+    #[test]
+    fn default_delete_filter_sets_nothing() {
+        let filter = DeleteFilter::default();
+        assert!(filter.namespace.is_none());
+        assert!(filter.tag.is_none());
+        assert!(filter.version.is_none());
+        assert!(filter.created_before.is_none());
+    }
+}

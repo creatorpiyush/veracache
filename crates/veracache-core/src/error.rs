@@ -28,3 +28,21 @@ impl fmt::Display for Error {
 }
 
 impl std::error::Error for Error {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn display_names_the_failed_component() {
+        let cases = [
+            (Error::Embed("x".into()), "embedder error: x"),
+            (Error::Store("x".into()), "store error: x"),
+            (Error::Analyze("x".into()), "analyzer error: x"),
+            (Error::Rerank("x".into()), "reranker error: x"),
+        ];
+        for (error, expected) in cases {
+            assert_eq!(error.to_string(), expected);
+        }
+    }
+}

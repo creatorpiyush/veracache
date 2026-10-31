@@ -183,6 +183,63 @@ async fn rejects_bad_responses() {
 }
 
 #[tokio::test]
+async fn id_is_the_model_and_dim_is_configured() {
+    let server = MockServer::start().await;
+    let embedder = embedder(&server, 42);
+    assert_eq!(embedder.id(), "model");
+    assert_eq!(embedder.dim(), 42);
+}
+
+#[tokio::test]
+async fn base_url_works_without_a_trailing_slash() {
+    let server = MockServer::start().await;
+    respond_with(&server, json!({"data": [{"index": 0, "embedding": [1.0]}]})).await;
+
+    let embedder = RemoteEmbedder::new(RemoteConfig {
+        base_url: format!("{}/v1", server.uri()),
+        api_key: None,
+        model: "model".into(),
+        dim: 1,
+    })
+    .unwrap();
+    assert!(embedder.embed(&texts(1)).await.is_ok());
+}
+
+#[tokio::test]
+async fn unauthorized_is_an_error() {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .respond_with(ResponseTemplate::new(401))
+        .mount(&server)
+        .await;
+
+    assert!(embedder(&server, 1).embed(&texts(1)).await.is_err());
+}
+
+#[tokio::test]
+async fn invalid_json_is_an_error() {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .respond_with(ResponseTemplate::new(200).set_body_string("not json"))
+        .mount(&server)
+        .await;
+
+    assert!(embedder(&server, 1).embed(&texts(1)).await.is_err());
+}
+
+#[tokio::test]
+async fn a_failed_batch_fails_the_whole_call() {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .respond_with(ResponseTemplate::new(500))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    assert!(embedder(&server, 1).embed(&texts(300)).await.is_err());
+}
+
+#[tokio::test]
 async fn unreachable_server_is_an_error() {
     let unreachable = RemoteEmbedder::new(RemoteConfig {
         base_url: "http://127.0.0.1:9".into(),

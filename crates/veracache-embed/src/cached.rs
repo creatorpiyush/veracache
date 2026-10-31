@@ -215,4 +215,58 @@ mod tests {
         let cached = CachedEmbedder::new(&inner, 10);
         assert!(cached.embed(&texts(&["a", "bb"])).await.is_err());
     }
+
+    #[tokio::test]
+    async fn forwards_id_and_dim() {
+        let inner = Counting::default();
+        let cached = CachedEmbedder::new(&inner, 10);
+        assert_eq!(cached.id(), "counting");
+        assert_eq!(cached.dim(), 1);
+    }
+
+    #[tokio::test]
+    async fn empty_input_calls_nothing() {
+        let inner = Counting::default();
+        let cached = CachedEmbedder::new(&inner, 10);
+        assert!(cached.embed(&[]).await.unwrap().is_empty());
+        assert_eq!(inner.calls.load(Ordering::SeqCst), 0);
+    }
+
+    #[tokio::test]
+    async fn duplicates_in_one_batch_both_get_vectors() {
+        let inner = Counting::default();
+        let cached = CachedEmbedder::new(&inner, 10);
+
+        let vectors = cached.embed(&texts(&["aa", "aa"])).await.unwrap();
+
+        assert_eq!(vectors, [vec![2.0], vec![2.0]]);
+    }
+
+    #[tokio::test]
+    async fn different_texts_do_not_share_a_vector() {
+        let inner = Counting::default();
+        let cached = CachedEmbedder::new(&inner, 10);
+        cached.embed(&texts(&["a"])).await.unwrap();
+
+        let vectors = cached.embed(&texts(&["bb"])).await.unwrap();
+
+        assert_eq!(vectors, [vec![2.0]]);
+    }
+
+    #[test]
+    fn updating_a_key_at_capacity_evicts_nothing() {
+        let mut lru = Lru::default();
+        lru.insert([1; 32], vec![1.0], 2);
+        lru.insert([2; 32], vec![2.0], 2);
+
+        lru.insert([1; 32], vec![3.0], 2);
+
+        assert_eq!(lru.get(&[1; 32]), Some(vec![3.0]));
+        assert_eq!(lru.get(&[2; 32]), Some(vec![2.0]));
+    }
+
+    #[test]
+    fn missing_key_returns_none() {
+        assert_eq!(Lru::default().get(&[1; 32]), None);
+    }
 }

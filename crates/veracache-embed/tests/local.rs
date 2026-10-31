@@ -30,3 +30,27 @@ async fn paraphrases_score_higher_than_unrelated_text() {
     let unrelated = dot(&vectors[0], &vectors[2]);
     assert!(paraphrase > unrelated + 0.2, "{paraphrase} vs {unrelated}");
 }
+
+#[tokio::test]
+#[ignore = "downloads the model"]
+async fn reports_its_model_and_handles_empty_input() {
+    let cache_dir = concat!(env!("CARGO_TARGET_TMPDIR"), "/fastembed");
+    let embedder = LocalEmbedder::new(cache_dir).unwrap();
+
+    assert_eq!(embedder.id(), "bge-small-en-v1.5");
+    assert_eq!(embedder.dim(), 384);
+    assert!(embedder.embed(&[]).await.unwrap().is_empty());
+}
+
+#[tokio::test]
+#[ignore = "downloads the model"]
+async fn identical_text_gives_identical_vectors() {
+    let cache_dir = concat!(env!("CARGO_TARGET_TMPDIR"), "/fastembed");
+    let embedder = LocalEmbedder::new(cache_dir).unwrap();
+    let text = ["same text".to_string()];
+
+    let first = embedder.embed(&text).await.unwrap();
+    let second = embedder.embed(&text).await.unwrap();
+
+    assert_eq!(first, second);
+}

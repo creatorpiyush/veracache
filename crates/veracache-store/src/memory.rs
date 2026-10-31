@@ -519,6 +519,182 @@ mod tests {
         }
     }
 
+    fn at_key(mut item: CacheEntry, key: u8, namespace: Namespace) -> CacheEntry {
+        item.key_hash = [key; 32];
+        item.namespace = namespace;
+        item
+    }
+
+    #[tokio::test]
+    async fn default_store_is_empty_and_usable() {
+        let store = MemoryStore::default();
+        assert!(store.search(&NS, &[1.0], 5).await.unwrap().is_empty());
+        store.upsert(entry(1, vec![1.0])).await.unwrap();
+        assert_eq!(store.search(&NS, &[1.0], 5).await.unwrap().len(), 1);
+    }
+
+    #[tokio::test]
+    async fn same_id_at_a_new_key_moves_the_entry() {
+        for threshold in [1, 1_000] {
+            let store = MemoryStore::new().with_index_threshold(threshold);
+            let vector = vector_for(1);
+            let first = at_key(entry(1, vector.clone()), 1, NS);
+            let moved = at_key(entry(1, vector.clone()), 2, NS);
+            store.upsert(first).await.unwrap();
+            store.upsert(moved).await.unwrap();
+
+            assert_eq!(store.get_exact(&NS, &[1; 32]).await.unwrap(), None);
+            assert!(store.get_exact(&NS, &[2; 32]).await.unwrap().is_some());
+            assert_eq!(store.search(&NS, &vector, 5).await.unwrap().len(), 1);
+        }
+    }
+
+    #[tokio::test]
+    async fn same_id_in_a_new_namespace_moves_the_entry() {
+        let store = MemoryStore::new();
+        let other = Namespace([2; 32]);
+        store
+            .upsert(at_key(entry(1, vec![1.0]), 1, NS))
+            .await
+            .unwrap();
+        store
+            .upsert(at_key(entry(1, vec![1.0]), 1, other))
+            .await
+            .unwrap();
+
+        assert_eq!(store.get_exact(&NS, &[1; 32]).await.unwrap(), None);
+        assert!(store.get_exact(&other, &[1; 32]).await.unwrap().is_some());
+
+        let correct = Feedback { correct: false };
+        store.record_feedback(EntryId(1), correct).await.unwrap();
+        let found = store.get_exact(&other, &[1; 32]).await.unwrap().unwrap();
+        assert_eq!(found.stats.false_hit_reports, 1);
+    }
+
+    #[tokio::test]
+    async fn correct_feedback_changes_no_counter() {
+        let store = MemoryStore::new();
+        let stored = entry(1, vec![1.0]);
+        store.upsert(stored.clone()).await.unwrap();
+
+        let fb = Feedback { correct: true };
+        store.record_feedback(stored.id, fb).await.unwrap();
+
+        let found = store.get_exact(&NS, &stored.key_hash).await.unwrap();
+        assert_eq!(found.unwrap().stats, EntryStats::default());
+    }
+
+    #[tokio::test]
+    async fn k_larger_than_the_namespace_returns_everything() {
+        for threshold in [1, 1_000] {
+            let store = filled(threshold, 3).await;
+            let found = store.search(&NS, &vector_for(0), 50).await.unwrap();
+            assert_eq!(found.len(), 3);
+        }
+    }
+
+    #[tokio::test]
+    async fn delete_spans_namespaces_and_combines_fields() {
+        let store = MemoryStore::new();
+        let other = Namespace([2; 32]);
+        let tagged = |id, namespace, version: &str| {
+            let mut item = at_key(entry(id, vec![1.0]), id as u8, namespace);
+            item.tags = vec!["tag".into()];
+            item.version = Some(version.into());
+            item
+        };
+        store.upsert(tagged(1, NS, "v1")).await.unwrap();
+        store.upsert(tagged(2, other, "v1")).await.unwrap();
+        store.upsert(tagged(3, other, "v2")).await.unwrap();
+
+        let both = DeleteFilter {
+            tag: Some("tag".into()),
+            version: Some("v1".into()),
+            ..DeleteFilter::default()
+        };
+        assert_eq!(store.delete(both).await.unwrap(), 2);
+
+        assert_eq!(store.get_exact(&NS, &[1; 32]).await.unwrap(), None);
+        assert_eq!(store.get_exact(&other, &[2; 32]).await.unwrap(), None);
+        assert!(store.get_exact(&other, &[3; 32]).await.unwrap().is_some());
+    }
+
+    #[tokio::test]
+    async fn deleted_ids_reject_feedback() {
+        let store = filled(10, 20).await;
+        let filter = DeleteFilter {
+            namespace: Some(NS),
+            ..DeleteFilter::default()
+        };
+        assert_eq!(store.delete(filter).await.unwrap(), 20);
+
+        let fb = Feedback { correct: false };
+        assert!(store.record_feedback(EntryId(1), fb).await.is_err());
+    }
+
+    #[tokio::test]
+    async fn emptied_namespace_can_be_filled_again() {
+        for threshold in [1, 1_000] {
+            let store = filled(threshold, 20).await;
+            let filter = DeleteFilter {
+                namespace: Some(NS),
+                ..DeleteFilter::default()
+            };
+            store.delete(filter).await.unwrap();
+            assert!(
+                store
+                    .search(&NS, &vector_for(1), 5)
+                    .await
+                    .unwrap()
+                    .is_empty()
+            );
+
+            store.upsert(entry(1, vector_for(1))).await.unwrap();
+            assert_eq!(top_id(&store, &vector_for(1)).await, Some(1));
+        }
+    }
+
+    #[tokio::test]
+    async fn index_grows_past_its_reserved_capacity() {
+        let store = filled(4, 4).await;
+        let reserved = {
+            let state = store.read().unwrap();
+            state.namespaces[&NS].index.as_ref().unwrap().capacity()
+        };
+
+        let count = u32::try_from(reserved).unwrap() * 3;
+        for id in 4..count {
+            store.upsert(entry(id, vector_for(id))).await.unwrap();
+        }
+
+        for id in [0, count / 2, count - 1] {
+            assert_eq!(top_id(&store, &vector_for(id)).await, Some(id.into()));
+        }
+    }
+
+    #[tokio::test]
+    async fn rejected_upsert_leaves_the_old_entry() {
+        for threshold in [1, 1_000] {
+            let store = filled(threshold, 10).await;
+            let mut bad = vector_for(3);
+            bad[0] = f32::NAN;
+
+            assert!(store.upsert(entry(3, bad)).await.is_err());
+
+            assert_eq!(top_id(&store, &vector_for(3)).await, Some(3));
+        }
+    }
+
+    #[tokio::test]
+    async fn repeated_replacement_keeps_one_entry() {
+        let store = filled(10, 20).await;
+        for _ in 0..50 {
+            store.upsert(entry(5, vector_for(5))).await.unwrap();
+        }
+        let found = store.search(&NS, &vector_for(5), 25).await.unwrap();
+        assert_eq!(found.len(), 20);
+    }
+
     #[tokio::test]
     async fn zero_k_returns_nothing() {
         let store = filled(10, 50).await;
