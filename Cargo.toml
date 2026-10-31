@@ -11,6 +11,7 @@ authors = ["Piyush Anand"]
 repository = "https://github.com/creatorpiyush/veracache"
 
 [workspace.dependencies]
+async-trait = "0.1.92"
 veracache = { path = "crates/veracache" }
 veracache-core = { path = "crates/veracache-core" }
 veracache-embed = { path = "crates/veracache-embed" }
