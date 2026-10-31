@@ -10,3 +10,6 @@ repository.workspace = true
 
 [dependencies]
 veracache.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

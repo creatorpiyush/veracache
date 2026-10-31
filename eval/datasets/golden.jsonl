@@ -1,0 +1,208 @@
+{"id": "number-hit-01", "category": "number", "label": "hit", "split": "tuning", "a": "What was Apple's revenue in Q3 2024?", "b": "Apple revenue for Q3 2024?"}
+{"id": "number-hit-02", "category": "number", "label": "hit", "split": "tuning", "a": "What is 2 plus 2?", "b": "What's two plus two?"}
+{"id": "number-hit-03", "category": "number", "label": "hit", "split": "tuning", "a": "How long does it take to walk 10k?", "b": "How long does a 10,000 meter walk take?"}
+{"id": "number-hit-04", "category": "number", "label": "hit", "split": "tuning", "a": "Give me 5 tips for better sleep", "b": "List five tips to sleep better"}
+{"id": "number-hit-05", "category": "number", "label": "hit", "split": "tuning", "a": "Who won the 2018 World Cup?", "b": "Which country won the World Cup in 2018?"}
+{"id": "number-hit-06", "category": "number", "label": "hit", "split": "tuning", "a": "What is the boiling point of water at 100 kPa?", "b": "At 100 kPa, what temperature does water boil at?"}
+{"id": "number-hit-07", "category": "number", "label": "hit", "split": "tuning", "a": "Convert 50 miles to kilometers", "b": "What is 50 miles in km?"}
+{"id": "number-hit-08", "category": "number", "label": "hit", "split": "tuning", "a": "What is 15% of 200?", "b": "Calculate 15 percent of 200"}
+{"id": "number-hit-09", "category": "number", "label": "hit", "split": "tuning", "a": "Who was the 16th US president?", "b": "Who was the sixteenth president of the United States?"}
+{"id": "number-hit-10", "category": "number", "label": "hit", "split": "tuning", "a": "Top 3 programming languages for beginners", "b": "What are the three best programming languages for beginners?"}
+{"id": "number-hit-11", "category": "number", "label": "hit", "split": "held_out", "a": "How many days are in 3 weeks?", "b": "3 weeks is how many days?"}
+{"id": "number-hit-12", "category": "number", "label": "hit", "split": "held_out", "a": "What does a 7 day forecast show?", "b": "What does a seven-day forecast show?"}
+{"id": "number-hit-13", "category": "number", "label": "hit", "split": "held_out", "a": "Summarize chapter 4 of the handbook", "b": "Give me a summary of chapter four of the handbook"}
+{"id": "number-miss-01", "category": "number", "label": "miss", "split": "tuning", "a": "What was Apple's revenue in Q2 2024?", "b": "What was Apple's revenue in Q3 2024?"}
+{"id": "number-miss-02", "category": "number", "label": "miss", "split": "tuning", "a": "What was Tesla's revenue in 2022?", "b": "What was Tesla's revenue in 2023?"}
+{"id": "number-miss-03", "category": "number", "label": "miss", "split": "tuning", "a": "What is 15% of 200?", "b": "What is 25% of 200?"}
+{"id": "number-miss-04", "category": "number", "label": "miss", "split": "tuning", "a": "Give me 3 tips for better sleep", "b": "Give me 10 tips for better sleep"}
+{"id": "number-miss-05", "category": "number", "label": "miss", "split": "tuning", "a": "Who was the 16th US president?", "b": "Who was the 17th US president?"}
+{"id": "number-miss-06", "category": "number", "label": "miss", "split": "tuning", "a": "Convert 50 miles to kilometers", "b": "Convert 60 miles to kilometers"}
+{"id": "number-miss-07", "category": "number", "label": "miss", "split": "tuning", "a": "Is a salary of 80k good in Berlin?", "b": "Is a salary of 120k good in Berlin?"}
+{"id": "number-miss-08", "category": "number", "label": "miss", "split": "tuning", "a": "Dosage of ibuprofen for a 10 kg child", "b": "Dosage of ibuprofen for a 20 kg child"}
+{"id": "number-miss-09", "category": "number", "label": "miss", "split": "tuning", "a": "Who won the 2018 World Cup?", "b": "Who won the 2022 World Cup?"}
+{"id": "number-miss-10", "category": "number", "label": "miss", "split": "tuning", "a": "What is the 2nd largest planet?", "b": "What is the 3rd largest planet?"}
+{"id": "number-miss-11", "category": "number", "label": "miss", "split": "held_out", "a": "Summarize chapter 4 of the handbook", "b": "Summarize chapter 5 of the handbook"}
+{"id": "number-miss-12", "category": "number", "label": "miss", "split": "held_out", "a": "How do I upgrade to Python 3.11?", "b": "How do I upgrade to Python 3.12?"}
+{"id": "number-miss-13", "category": "number", "label": "miss", "split": "held_out", "a": "What is the square root of 144?", "b": "What is the square root of 169?"}
+{"id": "date-hit-01", "category": "date", "label": "hit", "split": "tuning", "a": "What happened on October 3, 2025?", "b": "What happened on Oct 3rd, 2025?"}
+{"id": "date-hit-02", "category": "date", "label": "hit", "split": "tuning", "a": "What's the weather today?", "b": "How is the weather today?"}
+{"id": "date-hit-03", "category": "date", "label": "hit", "split": "tuning", "a": "What meetings do I have tomorrow?", "b": "Which meetings are on my calendar tomorrow?"}
+{"id": "date-hit-04", "category": "date", "label": "hit", "split": "tuning", "a": "Who won the election in November 2020?", "b": "Who won the November 2020 election?"}
+{"id": "date-hit-05", "category": "date", "label": "hit", "split": "tuning", "a": "What holidays fall in December?", "b": "Which holidays are in December?"}
+{"id": "date-hit-06", "category": "date", "label": "hit", "split": "tuning", "a": "What was the stock price on 2024-01-15?", "b": "What was the stock price on January 15, 2024?"}
+{"id": "date-hit-07", "category": "date", "label": "hit", "split": "tuning", "a": "Show me sales from last week", "b": "Display last week's sales"}
+{"id": "date-hit-08", "category": "date", "label": "hit", "split": "tuning", "a": "Is the office open on Monday?", "b": "Will the office be open Monday?"}
+{"id": "date-hit-09", "category": "date", "label": "hit", "split": "tuning", "a": "What are the top news stories today?", "b": "What are today's top news stories?"}
+{"id": "date-hit-10", "category": "date", "label": "hit", "split": "tuning", "a": "When is the deadline this Friday?", "b": "When is this Friday's deadline?"}
+{"id": "date-hit-11", "category": "date", "label": "hit", "split": "held_out", "a": "What did the Fed announce in March 2023?", "b": "What was the Fed's announcement in March 2023?"}
+{"id": "date-hit-12", "category": "date", "label": "hit", "split": "held_out", "a": "How much did we spend yesterday?", "b": "What was yesterday's spend?"}
+{"id": "date-hit-13", "category": "date", "label": "hit", "split": "held_out", "a": "What is on the schedule next Tuesday?", "b": "What's scheduled for next Tuesday?"}
+{"id": "date-miss-01", "category": "date", "label": "miss", "split": "tuning", "a": "What's the weather today?", "b": "What's the weather tomorrow?"}
+{"id": "date-miss-02", "category": "date", "label": "miss", "split": "tuning", "a": "What meetings do I have today?", "b": "What meetings do I have tomorrow?"}
+{"id": "date-miss-03", "category": "date", "label": "miss", "split": "tuning", "a": "Show me sales from last week", "b": "Show me sales from this week"}
+{"id": "date-miss-04", "category": "date", "label": "miss", "split": "tuning", "a": "What happened on October 3, 2025?", "b": "What happened on October 4, 2025?"}
+{"id": "date-miss-05", "category": "date", "label": "miss", "split": "tuning", "a": "What was the stock price on 2024-01-15?", "b": "What was the stock price on 2024-02-15?"}
+{"id": "date-miss-06", "category": "date", "label": "miss", "split": "tuning", "a": "Is the office open on Monday?", "b": "Is the office open on Tuesday?"}
+{"id": "date-miss-07", "category": "date", "label": "miss", "split": "tuning", "a": "What holidays fall in December?", "b": "What holidays fall in January?"}
+{"id": "date-miss-08", "category": "date", "label": "miss", "split": "tuning", "a": "How much did we spend yesterday?", "b": "How much did we spend today?"}
+{"id": "date-miss-09", "category": "date", "label": "miss", "split": "tuning", "a": "Show revenue for last month", "b": "Show revenue for last year"}
+{"id": "date-miss-10", "category": "date", "label": "miss", "split": "tuning", "a": "What is on the schedule next Tuesday?", "b": "What is on the schedule next Thursday?"}
+{"id": "date-miss-11", "category": "date", "label": "miss", "split": "held_out", "a": "Who won the election in November 2020?", "b": "Who won the election in November 2024?"}
+{"id": "date-miss-12", "category": "date", "label": "miss", "split": "held_out", "a": "Is the store open this weekend?", "b": "Is the store open next weekend?"}
+{"id": "date-miss-13", "category": "date", "label": "miss", "split": "held_out", "a": "What are this morning's headlines?", "b": "What are this evening's headlines?"}
+{"id": "negation-hit-01", "category": "negation", "label": "hit", "split": "tuning", "a": "Recipe for cake without eggs", "b": "Egg-free cake recipe"}
+{"id": "negation-hit-02", "category": "negation", "label": "hit", "split": "tuning", "a": "Why can't I log in?", "b": "Why am I unable to log in?"}
+{"id": "negation-hit-03", "category": "negation", "label": "hit", "split": "tuning", "a": "Foods that do not contain gluten", "b": "Foods that don't contain gluten"}
+{"id": "negation-hit-04", "category": "negation", "label": "hit", "split": "tuning", "a": "Why doesn't my printer work?", "b": "Why does my printer not work?"}
+{"id": "negation-hit-05", "category": "negation", "label": "hit", "split": "tuning", "a": "Which countries have no army?", "b": "Which countries don't have an army?"}
+{"id": "negation-hit-06", "category": "negation", "label": "hit", "split": "tuning", "a": "I never received my order, what should I do?", "b": "My order never arrived, what should I do?"}
+{"id": "negation-hit-07", "category": "negation", "label": "hit", "split": "tuning", "a": "How do I cook rice without a rice cooker?", "b": "How can I make rice with no rice cooker?"}
+{"id": "negation-hit-08", "category": "negation", "label": "hit", "split": "tuning", "a": "Is it safe not to update my phone?", "b": "Is it safe if I don't update my phone?"}
+{"id": "negation-hit-09", "category": "negation", "label": "hit", "split": "tuning", "a": "What should I not eat during pregnancy?", "b": "What foods shouldn't I eat when pregnant?"}
+{"id": "negation-hit-10", "category": "negation", "label": "hit", "split": "tuning", "a": "Why won't my car start?", "b": "Why will my car not start?"}
+{"id": "negation-hit-11", "category": "negation", "label": "hit", "split": "held_out", "a": "All countries in Europe except France", "b": "Every European country except France"}
+{"id": "negation-hit-12", "category": "negation", "label": "hit", "split": "held_out", "a": "Why can't dogs eat chocolate?", "b": "Why is it that dogs cannot eat chocolate?"}
+{"id": "negation-hit-13", "category": "negation", "label": "hit", "split": "held_out", "a": "Vegetables that aren't starchy", "b": "Vegetables that are not starchy"}
+{"id": "negation-miss-01", "category": "negation", "label": "miss", "split": "tuning", "a": "Recipe for cake with eggs", "b": "Recipe for cake without eggs"}
+{"id": "negation-miss-02", "category": "negation", "label": "miss", "split": "tuning", "a": "Foods that contain gluten", "b": "Foods that do not contain gluten"}
+{"id": "negation-miss-03", "category": "negation", "label": "miss", "split": "tuning", "a": "Which countries have an army?", "b": "Which countries have no army?"}
+{"id": "negation-miss-04", "category": "negation", "label": "miss", "split": "tuning", "a": "Is it safe to update my phone?", "b": "Is it safe not to update my phone?"}
+{"id": "negation-miss-05", "category": "negation", "label": "miss", "split": "tuning", "a": "What should I eat during pregnancy?", "b": "What should I not eat during pregnancy?"}
+{"id": "negation-miss-06", "category": "negation", "label": "miss", "split": "tuning", "a": "All countries in Europe", "b": "All countries in Europe except France"}
+{"id": "negation-miss-07", "category": "negation", "label": "miss", "split": "tuning", "a": "Vegetables that are starchy", "b": "Vegetables that are not starchy"}
+{"id": "negation-miss-08", "category": "negation", "label": "miss", "split": "tuning", "a": "Why does my code compile?", "b": "Why doesn't my code compile?"}
+{"id": "negation-miss-09", "category": "negation", "label": "miss", "split": "tuning", "a": "Things to do before an interview", "b": "Things not to do before an interview"}
+{"id": "negation-miss-10", "category": "negation", "label": "miss", "split": "tuning", "a": "Medicines safe with alcohol", "b": "Medicines never safe with alcohol"}
+{"id": "negation-miss-11", "category": "negation", "label": "miss", "split": "held_out", "a": "Hotels near the beach with parking", "b": "Hotels near the beach without parking"}
+{"id": "negation-miss-12", "category": "negation", "label": "miss", "split": "held_out", "a": "Should I take aspirin with ibuprofen?", "b": "Should I not take aspirin with ibuprofen?"}
+{"id": "negation-miss-13", "category": "negation", "label": "miss", "split": "held_out", "a": "Show orders that shipped", "b": "Show orders that have not shipped"}
+{"id": "direction-hit-01", "category": "direction", "label": "hit", "split": "tuning", "a": "Flights from Delhi to Mumbai", "b": "Flights to Mumbai from Delhi"}
+{"id": "direction-hit-02", "category": "direction", "label": "hit", "split": "tuning", "a": "Convert USD to EUR", "b": "Change US dollars into euros"}
+{"id": "direction-hit-03", "category": "direction", "label": "hit", "split": "tuning", "a": "Which is bigger, Mars or Venus?", "b": "Between Mars and Venus, which is larger?"}
+{"id": "direction-hit-04", "category": "direction", "label": "hit", "split": "tuning", "a": "What happened before World War II?", "b": "What events came before World War II?"}
+{"id": "direction-hit-05", "category": "direction", "label": "hit", "split": "tuning", "a": "Train from Paris to Lyon", "b": "Train to Lyon from Paris"}
+{"id": "direction-hit-06", "category": "direction", "label": "hit", "split": "tuning", "a": "Is the temperature above freezing?", "b": "Is it above freezing temperature?"}
+{"id": "direction-hit-07", "category": "direction", "label": "hit", "split": "tuning", "a": "What should I do after a car accident?", "b": "What are the steps to take after a car accident?"}
+{"id": "direction-hit-08", "category": "direction", "label": "hit", "split": "tuning", "a": "How do I send money from the US to India?", "b": "How can I send money to India from the US?"}
+{"id": "direction-hit-09", "category": "direction", "label": "hit", "split": "tuning", "a": "Which has more protein, eggs or milk?", "b": "Between eggs and milk, which has more protein?"}
+{"id": "direction-hit-10", "category": "direction", "label": "hit", "split": "tuning", "a": "Drive from Boston to New York", "b": "Drive to New York from Boston"}
+{"id": "direction-hit-11", "category": "direction", "label": "hit", "split": "held_out", "a": "What goes below the title in a resume?", "b": "What comes below the title on a resume?"}
+{"id": "direction-hit-12", "category": "direction", "label": "hit", "split": "held_out", "a": "Translate this from English to Hindi", "b": "Translate this to Hindi from English"}
+{"id": "direction-hit-13", "category": "direction", "label": "hit", "split": "held_out", "a": "Should I stretch before running?", "b": "Is stretching before running a good idea?"}
+{"id": "direction-miss-01", "category": "direction", "label": "miss", "split": "tuning", "a": "Flights from Delhi to Mumbai", "b": "Flights from Mumbai to Delhi"}
+{"id": "direction-miss-02", "category": "direction", "label": "miss", "split": "tuning", "a": "Convert USD to EUR", "b": "Convert EUR to USD"}
+{"id": "direction-miss-03", "category": "direction", "label": "miss", "split": "tuning", "a": "Train from Paris to Lyon", "b": "Train from Lyon to Paris"}
+{"id": "direction-miss-04", "category": "direction", "label": "miss", "split": "tuning", "a": "Should I stretch before running?", "b": "Should I stretch after running?"}
+{"id": "direction-miss-05", "category": "direction", "label": "miss", "split": "tuning", "a": "What happened before World War II?", "b": "What happened after World War II?"}
+{"id": "direction-miss-06", "category": "direction", "label": "miss", "split": "tuning", "a": "Translate this from English to Hindi", "b": "Translate this from Hindi to English"}
+{"id": "direction-miss-07", "category": "direction", "label": "miss", "split": "tuning", "a": "Is the temperature above freezing?", "b": "Is the temperature below freezing?"}
+{"id": "direction-miss-08", "category": "direction", "label": "miss", "split": "tuning", "a": "Foods with more fiber than oats", "b": "Foods with less fiber than oats"}
+{"id": "direction-miss-09", "category": "direction", "label": "miss", "split": "tuning", "a": "Is Python faster than Java?", "b": "Is Java faster than Python?"}
+{"id": "direction-miss-10", "category": "direction", "label": "miss", "split": "tuning", "a": "How to migrate from Postgres to MySQL", "b": "How to migrate from MySQL to Postgres"}
+{"id": "direction-miss-11", "category": "direction", "label": "miss", "split": "held_out", "a": "Is the cost higher than last year?", "b": "Is the cost lower than last year?"}
+{"id": "direction-miss-12", "category": "direction", "label": "miss", "split": "held_out", "a": "Move funds from savings to checking", "b": "Move funds from checking to savings"}
+{"id": "direction-miss-13", "category": "direction", "label": "miss", "split": "held_out", "a": "What should I eat before a workout?", "b": "What should I eat after a workout?"}
+{"id": "entity-hit-01", "category": "entity", "label": "hit", "split": "tuning", "a": "What is the capital of France?", "b": "Tell me the capital city of France"}
+{"id": "entity-hit-02", "category": "entity", "label": "hit", "split": "tuning", "a": "Who founded Microsoft?", "b": "Who were the founders of Microsoft?"}
+{"id": "entity-hit-03", "category": "entity", "label": "hit", "split": "tuning", "a": "How tall is Mount Everest?", "b": "What is the height of Mount Everest?"}
+{"id": "entity-hit-04", "category": "entity", "label": "hit", "split": "tuning", "a": "What does NASA do?", "b": "What is NASA's job?"}
+{"id": "entity-hit-05", "category": "entity", "label": "hit", "split": "tuning", "a": "Where is the Eiffel Tower?", "b": "Where can I find the Eiffel Tower?"}
+{"id": "entity-hit-06", "category": "entity", "label": "hit", "split": "tuning", "a": "Who wrote Pride and Prejudice?", "b": "Who is the author of Pride and Prejudice?"}
+{"id": "entity-hit-07", "category": "entity", "label": "hit", "split": "tuning", "a": "What is the population of Japan?", "b": "How many people live in Japan?"}
+{"id": "entity-hit-08", "category": "entity", "label": "hit", "split": "tuning", "a": "What is the currency of Brazil?", "b": "Which currency does Brazil use?"}
+{"id": "entity-hit-09", "category": "entity", "label": "hit", "split": "tuning", "a": "Tell me about Albert Einstein", "b": "Tell me about Einstein"}
+{"id": "entity-hit-10", "category": "entity", "label": "hit", "split": "tuning", "a": "what is the capital of france", "b": "tell me the capital city of france"}
+{"id": "entity-hit-11", "category": "entity", "label": "hit", "split": "held_out", "a": "who founded microsoft", "b": "who were the founders of microsoft"}
+{"id": "entity-hit-12", "category": "entity", "label": "hit", "split": "held_out", "a": "how tall is mount everest", "b": "what is the height of mount everest"}
+{"id": "entity-hit-13", "category": "entity", "label": "hit", "split": "held_out", "a": "what language do they speak in brazil", "b": "which language is spoken in brazil"}
+{"id": "entity-miss-01", "category": "entity", "label": "miss", "split": "tuning", "a": "What is the capital of France?", "b": "What is the capital of Germany?"}
+{"id": "entity-miss-02", "category": "entity", "label": "miss", "split": "tuning", "a": "Who founded Microsoft?", "b": "Who founded Apple?"}
+{"id": "entity-miss-03", "category": "entity", "label": "miss", "split": "tuning", "a": "How tall is Mount Everest?", "b": "How tall is Mount Fuji?"}
+{"id": "entity-miss-04", "category": "entity", "label": "miss", "split": "tuning", "a": "Who wrote Pride and Prejudice?", "b": "Who wrote War and Peace?"}
+{"id": "entity-miss-05", "category": "entity", "label": "miss", "split": "tuning", "a": "What is the population of Japan?", "b": "What is the population of Canada?"}
+{"id": "entity-miss-06", "category": "entity", "label": "miss", "split": "tuning", "a": "What is the currency of Brazil?", "b": "What is the currency of Mexico?"}
+{"id": "entity-miss-07", "category": "entity", "label": "miss", "split": "tuning", "a": "Tell me about Albert Einstein", "b": "Tell me about Isaac Newton"}
+{"id": "entity-miss-08", "category": "entity", "label": "miss", "split": "tuning", "a": "What does NASA do?", "b": "What does ESA do?"}
+{"id": "entity-miss-09", "category": "entity", "label": "miss", "split": "tuning", "a": "what is the capital of france", "b": "what is the capital of germany"}
+{"id": "entity-miss-10", "category": "entity", "label": "miss", "split": "tuning", "a": "who founded microsoft", "b": "who founded google"}
+{"id": "entity-miss-11", "category": "entity", "label": "miss", "split": "held_out", "a": "how tall is mount everest", "b": "how tall is kilimanjaro"}
+{"id": "entity-miss-12", "category": "entity", "label": "miss", "split": "held_out", "a": "what is the currency of brazil", "b": "what is the currency of india"}
+{"id": "entity-miss-13", "category": "entity", "label": "miss", "split": "held_out", "a": "best restaurants in chicago", "b": "best restaurants in seattle"}
+{"id": "quote-hit-01", "category": "quote", "label": "hit", "split": "tuning", "a": "What does \"carpe diem\" mean?", "b": "Meaning of the phrase \"carpe diem\""}
+{"id": "quote-hit-02", "category": "quote", "label": "hit", "split": "tuning", "a": "Who said \"I think, therefore I am\"?", "b": "Who is the source of the quote \"I think, therefore I am\"?"}
+{"id": "quote-hit-03", "category": "quote", "label": "hit", "split": "tuning", "a": "What does `git rebase` do?", "b": "Explain what `git rebase` does"}
+{"id": "quote-hit-04", "category": "quote", "label": "hit", "split": "tuning", "a": "Translate \"good morning\" to Spanish", "b": "How do you say \"good morning\" in Spanish?"}
+{"id": "quote-hit-05", "category": "quote", "label": "hit", "split": "tuning", "a": "Where does the phrase \"break a leg\" come from?", "b": "What is the origin of \"break a leg\"?"}
+{"id": "quote-hit-06", "category": "quote", "label": "hit", "split": "tuning", "a": "How do I use `grep -r`?", "b": "Show me how to use `grep -r`"}
+{"id": "quote-hit-07", "category": "quote", "label": "hit", "split": "tuning", "a": "Define \"opportunity cost\"", "b": "What is the definition of \"opportunity cost\"?"}
+{"id": "quote-hit-08", "category": "quote", "label": "hit", "split": "tuning", "a": "What does `Option::unwrap` do in Rust?", "b": "In Rust, what does `Option::unwrap` do?"}
+{"id": "quote-hit-09", "category": "quote", "label": "hit", "split": "tuning", "a": "Correct the spelling of \"definately\"", "b": "Fix the spelling of \"definately\""}
+{"id": "quote-hit-10", "category": "quote", "label": "hit", "split": "tuning", "a": "What does the `-v` flag do?", "b": "Explain the `-v` flag"}
+{"id": "quote-hit-11", "category": "quote", "label": "hit", "split": "held_out", "a": "Is \"irregardless\" a word?", "b": "Does the word \"irregardless\" exist?"}
+{"id": "quote-hit-12", "category": "quote", "label": "hit", "split": "held_out", "a": "What is the plural of \"cactus\"?", "b": "Give me the plural form of \"cactus\""}
+{"id": "quote-hit-13", "category": "quote", "label": "hit", "split": "held_out", "a": "Why does `SELECT *` hurt performance?", "b": "How does `SELECT *` hurt performance?"}
+{"id": "quote-miss-01", "category": "quote", "label": "miss", "split": "tuning", "a": "What does \"carpe diem\" mean?", "b": "What does \"memento mori\" mean?"}
+{"id": "quote-miss-02", "category": "quote", "label": "miss", "split": "tuning", "a": "What does `git rebase` do?", "b": "What does `git merge` do?"}
+{"id": "quote-miss-03", "category": "quote", "label": "miss", "split": "tuning", "a": "Translate \"good morning\" to Spanish", "b": "Translate \"good night\" to Spanish"}
+{"id": "quote-miss-04", "category": "quote", "label": "miss", "split": "tuning", "a": "Where does the phrase \"break a leg\" come from?", "b": "Where does the phrase \"bite the bullet\" come from?"}
+{"id": "quote-miss-05", "category": "quote", "label": "miss", "split": "tuning", "a": "How do I use `grep -r`?", "b": "How do I use `grep -v`?"}
+{"id": "quote-miss-06", "category": "quote", "label": "miss", "split": "tuning", "a": "Define \"opportunity cost\"", "b": "Define \"sunk cost\""}
+{"id": "quote-miss-07", "category": "quote", "label": "miss", "split": "tuning", "a": "What does `Option::unwrap` do in Rust?", "b": "What does `Option::expect` do in Rust?"}
+{"id": "quote-miss-08", "category": "quote", "label": "miss", "split": "tuning", "a": "Correct the spelling of \"definately\"", "b": "Correct the spelling of \"recieve\""}
+{"id": "quote-miss-09", "category": "quote", "label": "miss", "split": "tuning", "a": "What does the `-v` flag do?", "b": "What does the `-q` flag do?"}
+{"id": "quote-miss-10", "category": "quote", "label": "miss", "split": "tuning", "a": "What is the plural of \"cactus\"?", "b": "What is the plural of \"octopus\"?"}
+{"id": "quote-miss-11", "category": "quote", "label": "miss", "split": "held_out", "a": "Who said \"I think, therefore I am\"?", "b": "Who said \"I came, I saw, I conquered\"?"}
+{"id": "quote-miss-12", "category": "quote", "label": "miss", "split": "held_out", "a": "Is \"irregardless\" a word?", "b": "Is \"conversate\" a word?"}
+{"id": "quote-miss-13", "category": "quote", "label": "miss", "split": "held_out", "a": "Why does `SELECT *` hurt performance?", "b": "Why does `SELECT DISTINCT` hurt performance?"}
+{"id": "length-hit-01", "category": "length", "label": "hit", "split": "tuning", "a": "What is recursion?", "b": "Can you please explain to me what recursion is?"}
+{"id": "length-hit-02", "category": "length", "label": "hit", "split": "tuning", "a": "Capital of Italy?", "b": "Could you tell me what the capital of Italy is?"}
+{"id": "length-hit-03", "category": "length", "label": "hit", "split": "tuning", "a": "Explain photosynthesis", "b": "I would like you to explain photosynthesis to me"}
+{"id": "length-hit-04", "category": "length", "label": "hit", "split": "tuning", "a": "Define inflation", "b": "What does the word inflation mean in economics?"}
+{"id": "length-hit-05", "category": "length", "label": "hit", "split": "tuning", "a": "How do magnets work?", "b": "I have always wondered, how do magnets actually work?"}
+{"id": "length-hit-06", "category": "length", "label": "hit", "split": "tuning", "a": "Speed of light?", "b": "What is the speed of light?"}
+{"id": "length-hit-07", "category": "length", "label": "hit", "split": "tuning", "a": "Boil an egg how?", "b": "How do I boil an egg?"}
+{"id": "length-hit-08", "category": "length", "label": "hit", "split": "tuning", "a": "What is DNS?", "b": "Hey, quick question, what exactly is DNS?"}
+{"id": "length-hit-09", "category": "length", "label": "hit", "split": "tuning", "a": "Why is the sky blue?", "b": "Can you explain to me why the sky is blue?"}
+{"id": "length-hit-10", "category": "length", "label": "hit", "split": "tuning", "a": "Python list comprehension example", "b": "Please show me an example of a list comprehension in Python"}
+{"id": "length-hit-11", "category": "length", "label": "hit", "split": "held_out", "a": "What causes tides?", "b": "What is it that causes the tides?"}
+{"id": "length-hit-12", "category": "length", "label": "hit", "split": "held_out", "a": "Tallest building in the world?", "b": "Which building is the tallest in the whole world?"}
+{"id": "length-hit-13", "category": "length", "label": "hit", "split": "held_out", "a": "Meaning of ephemeral", "b": "What is the meaning of the word ephemeral?"}
+{"id": "length-miss-01", "category": "length", "label": "miss", "split": "tuning", "a": "Explain recursion", "b": "Explain recursion to a five year old using a story about nesting dolls and keep it under fifty words"}
+{"id": "length-miss-02", "category": "length", "label": "miss", "split": "tuning", "a": "Write a poem", "b": "Write a poem about the sea in the style of Emily Dickinson with exactly three stanzas"}
+{"id": "length-miss-03", "category": "length", "label": "miss", "split": "tuning", "a": "Summarize this article", "b": "Summarize this article in two bullet points for a busy executive who only cares about cost"}
+{"id": "length-miss-04", "category": "length", "label": "miss", "split": "tuning", "a": "Best laptop", "b": "Best laptop for video editing under a thousand dollars with at least a fifteen inch screen"}
+{"id": "length-miss-05", "category": "length", "label": "miss", "split": "tuning", "a": "Write an email", "b": "Write an email to my landlord asking for the broken heater to be fixed by the end of this week"}
+{"id": "length-miss-06", "category": "length", "label": "miss", "split": "tuning", "a": "Plan a trip", "b": "Plan a seven day budget trip through Vietnam for two vegetarians who hate crowded places"}
+{"id": "length-miss-07", "category": "length", "label": "miss", "split": "tuning", "a": "Python sort", "b": "Python sort a list of dictionaries by two keys with one ascending and the other descending"}
+{"id": "length-miss-08", "category": "length", "label": "miss", "split": "tuning", "a": "Healthy dinner", "b": "Healthy dinner for a family of four where one child has a nut allergy and dinner takes under twenty minutes"}
+{"id": "length-miss-09", "category": "length", "label": "miss", "split": "tuning", "a": "Explain taxes", "b": "Explain how a freelancer in Germany should file taxes when they also earn income from a client in Spain"}
+{"id": "length-miss-10", "category": "length", "label": "miss", "split": "tuning", "a": "Workout plan", "b": "Workout plan for a beginner with a bad knee who only has dumbbells and three days each week"}
+{"id": "length-miss-11", "category": "length", "label": "miss", "split": "held_out", "a": "Cover letter", "b": "Cover letter for a junior data analyst role at a hospital from someone changing careers out of teaching"}
+{"id": "length-miss-12", "category": "length", "label": "miss", "split": "held_out", "a": "Fix my code", "b": "Fix my code where the async function hangs forever whenever the database connection pool is exhausted"}
+{"id": "length-miss-13", "category": "length", "label": "miss", "split": "held_out", "a": "Tell me a joke", "b": "Tell me a joke about accountants that is clean enough to share at a company wide meeting"}
+{"id": "follow_up-hit-01", "category": "follow_up", "label": "hit", "split": "tuning", "a": "What about tomorrow?", "b": "And how about tomorrow?", "a_history": ["What's the weather in Delhi?", "It is sunny."], "b_history": ["What's the weather in Delhi?", "It is sunny."]}
+{"id": "follow_up-hit-02", "category": "follow_up", "label": "hit", "split": "tuning", "a": "Why is that?", "b": "Why?", "a_history": ["Is the sky blue?", "Yes."], "b_history": ["Is the sky blue?", "Yes."]}
+{"id": "follow_up-hit-03", "category": "follow_up", "label": "hit", "split": "tuning", "a": "Can you make it shorter?", "b": "Please make it shorter", "a_history": ["Write a tagline for a bakery.", "Fresh bread, made with love every morning."], "b_history": ["Write a tagline for a bakery.", "Fresh bread, made with love every morning."]}
+{"id": "follow_up-hit-04", "category": "follow_up", "label": "hit", "split": "tuning", "a": "Give me an example", "b": "Show me an example", "a_history": ["What is a closure?", "A function that captures its environment."], "b_history": ["What is a closure?", "A function that captures its environment."]}
+{"id": "follow_up-hit-05", "category": "follow_up", "label": "hit", "split": "tuning", "a": "And in French?", "b": "How about in French?", "a_history": ["How do I say hello in Spanish?", "Hola."], "b_history": ["How do I say hello in Spanish?", "Hola."]}
+{"id": "follow_up-hit-06", "category": "follow_up", "label": "hit", "split": "tuning", "a": "What about the second one?", "b": "And the second one?", "a_history": ["List two rivers.", "The Nile and the Amazon."], "b_history": ["List two rivers.", "The Nile and the Amazon."]}
+{"id": "follow_up-hit-07", "category": "follow_up", "label": "hit", "split": "tuning", "a": "Is it safe?", "b": "Is that safe?", "a_history": ["Can I mix bleach and vinegar?", "You should not."], "b_history": ["Can I mix bleach and vinegar?", "You should not."]}
+{"id": "follow_up-hit-08", "category": "follow_up", "label": "hit", "split": "tuning", "a": "Tell me more", "b": "Tell me more about that", "a_history": ["Who was Ada Lovelace?", "An early computing pioneer."], "b_history": ["Who was Ada Lovelace?", "An early computing pioneer."]}
+{"id": "follow_up-hit-09", "category": "follow_up", "label": "hit", "split": "tuning", "a": "How much does it cost?", "b": "What does it cost?", "a_history": ["What is the fastest train in Japan?", "The Shinkansen."], "b_history": ["What is the fastest train in Japan?", "The Shinkansen."]}
+{"id": "follow_up-hit-10", "category": "follow_up", "label": "hit", "split": "tuning", "a": "Which is better?", "b": "Which one is better?", "a_history": ["Compare tea and coffee.", "Both contain caffeine."], "b_history": ["Compare tea and coffee.", "Both contain caffeine."]}
+{"id": "follow_up-hit-11", "category": "follow_up", "label": "hit", "split": "held_out", "a": "Can you explain that simply?", "b": "Can you explain that more simply?", "a_history": ["What is entropy?", "A measure of disorder."], "b_history": ["What is entropy?", "A measure of disorder."]}
+{"id": "follow_up-hit-12", "category": "follow_up", "label": "hit", "split": "held_out", "a": "Where is it?", "b": "Where is that?", "a_history": ["What is the tallest mountain?", "Mount Everest."], "b_history": ["What is the tallest mountain?", "Mount Everest."]}
+{"id": "follow_up-hit-13", "category": "follow_up", "label": "hit", "split": "held_out", "a": "Who wrote it?", "b": "Who is the author?", "a_history": ["What is the most read novel?", "Don Quixote."], "b_history": ["What is the most read novel?", "Don Quixote."]}
+{"id": "follow_up-miss-01", "category": "follow_up", "label": "miss", "split": "tuning", "a": "What about tomorrow?", "b": "What about tomorrow?", "a_history": [], "b_history": ["What's the weather in Delhi?", "It is sunny."]}
+{"id": "follow_up-miss-02", "category": "follow_up", "label": "miss", "split": "tuning", "a": "What about tomorrow?", "b": "What about tomorrow?", "a_history": ["What's the weather in Delhi?", "It is sunny."], "b_history": ["What meetings do I have today?", "Two meetings."]}
+{"id": "follow_up-miss-03", "category": "follow_up", "label": "miss", "split": "tuning", "a": "Why is that?", "b": "Why is that?", "a_history": ["Is the sky blue?", "Yes."], "b_history": ["Is the ocean salty?", "Yes."]}
+{"id": "follow_up-miss-04", "category": "follow_up", "label": "miss", "split": "tuning", "a": "Can you make it shorter?", "b": "Can you make it shorter?", "a_history": ["Write a tagline for a bakery.", "Fresh bread daily."], "b_history": ["Write a poem about rain.", "Rain falls softly."]}
+{"id": "follow_up-miss-05", "category": "follow_up", "label": "miss", "split": "tuning", "a": "Give me an example", "b": "Give me an example", "a_history": [], "b_history": ["What is a closure?", "A function that captures its environment."]}
+{"id": "follow_up-miss-06", "category": "follow_up", "label": "miss", "split": "tuning", "a": "And in French?", "b": "And in French?", "a_history": ["How do I say hello in Spanish?", "Hola."], "b_history": ["How do I say goodbye in Spanish?", "Adios."]}
+{"id": "follow_up-miss-07", "category": "follow_up", "label": "miss", "split": "tuning", "a": "What about the second one?", "b": "What about the second one?", "a_history": ["List two rivers.", "The Nile and the Amazon."], "b_history": ["List two mountains.", "Everest and K2."]}
+{"id": "follow_up-miss-08", "category": "follow_up", "label": "miss", "split": "tuning", "a": "Is it safe?", "b": "Is it safe?", "a_history": ["Can I mix bleach and vinegar?", "You should not."], "b_history": ["Can I eat raw eggs?", "There is some risk."]}
+{"id": "follow_up-miss-09", "category": "follow_up", "label": "miss", "split": "tuning", "a": "Tell me more", "b": "Tell me more", "a_history": [], "b_history": ["Who was Ada Lovelace?", "An early computing pioneer."]}
+{"id": "follow_up-miss-10", "category": "follow_up", "label": "miss", "split": "tuning", "a": "How much does it cost?", "b": "How much does it cost?", "a_history": ["What is the fastest train in Japan?", "The Shinkansen."], "b_history": ["What is the fastest car?", "A hypercar."]}
+{"id": "follow_up-miss-11", "category": "follow_up", "label": "miss", "split": "held_out", "a": "Which is better?", "b": "Which is better?", "a_history": ["Compare tea and coffee.", "Both contain caffeine."], "b_history": ["Compare Rust and Go.", "Both are compiled."]}
+{"id": "follow_up-miss-12", "category": "follow_up", "label": "miss", "split": "held_out", "a": "Where is it?", "b": "Where is it?", "a_history": ["What is the tallest mountain?", "Mount Everest."], "b_history": ["What is the longest river?", "The Nile."]}
+{"id": "follow_up-miss-13", "category": "follow_up", "label": "miss", "split": "held_out", "a": "Who wrote it?", "b": "Who wrote it?", "a_history": [], "b_history": ["What is the most read novel?", "Don Quixote."]}
