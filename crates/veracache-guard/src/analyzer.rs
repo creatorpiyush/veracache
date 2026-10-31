@@ -2,8 +2,10 @@ use veracache_core::{Analyzed, Analyzer, Result};
 
 use crate::date::extract_dates;
 use crate::direction::extract_directions;
+use crate::entity::extract_entities;
 use crate::negation::extract_negations;
 use crate::number::extract_numbers;
+use crate::quote::extract_quotes;
 
 const FEATURE_VERSION: u32 = 1;
 
@@ -18,14 +20,16 @@ impl Analyzer for EnglishAnalyzer {
 
     fn analyze(&self, text: &str) -> Result<Analyzed> {
         let (dates, without_dates) = extract_dates(text);
+        let (quotes, without_quotes) = extract_quotes(text);
         Ok(Analyzed {
             text: text.to_owned(),
             feature_version: FEATURE_VERSION,
             numbers: extract_numbers(&without_dates),
             dates,
+            entities: extract_entities(&without_quotes),
             negations: extract_negations(text),
             directions: extract_directions(text),
-            ..Analyzed::default()
+            quotes,
         })
     }
 }
