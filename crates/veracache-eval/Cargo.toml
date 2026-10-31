@@ -1,0 +1,12 @@
+[package]
+name = "veracache-eval"
+description = "Replay, sweep, and reports for veracache"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+veracache.workspace = true

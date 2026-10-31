@@ -1,0 +1,12 @@
+[package]
+name = "veracache-guard"
+description = "Analyzer and guards for veracache"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+veracache-core.workspace = true

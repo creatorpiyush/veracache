@@ -1,0 +1,20 @@
+[workspace]
+members = ["crates/*"]
+resolver = "3"
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT"
+authors = ["Piyush Anand"]
+repository = "https://github.com/creatorpiyush/veracache"
+
+[workspace.dependencies]
+veracache = { path = "crates/veracache" }
+veracache-core = { path = "crates/veracache-core" }
+veracache-embed = { path = "crates/veracache-embed" }
+veracache-eval = { path = "crates/veracache-eval" }
+veracache-guard = { path = "crates/veracache-guard" }
+veracache-proxy = { path = "crates/veracache-proxy" }
+veracache-store = { path = "crates/veracache-store" }
