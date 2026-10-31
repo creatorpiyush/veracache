@@ -3,6 +3,62 @@
 use std::collections::{HashMap, HashSet};
 
 use serde_json::Value;
+use veracache_eval::{Counts, Pair, Split, load_pairs, load_scores};
+
+const DATASETS: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../eval/datasets");
+
+fn loaded() -> Vec<Pair> {
+    load_pairs(format!("{DATASETS}/golden.jsonl")).unwrap()
+}
+
+fn scores_path() -> String {
+    format!("{DATASETS}/golden.scores.bge-small-en-v1.5.jsonl")
+}
+
+#[test]
+fn scores_cover_every_pair_and_are_fresh() {
+    let pairs = loaded();
+    let scores = load_scores(scores_path(), &pairs).unwrap();
+    assert_eq!(scores.len(), pairs.len());
+    assert!(scores.values().all(|s| (-1.0..=1.01).contains(s)));
+}
+
+#[test]
+fn edited_pair_makes_scores_stale() {
+    let mut pairs = loaded();
+    pairs[0].b.push('!');
+    let error = load_scores(scores_path(), &pairs).unwrap_err();
+    assert!(error.to_string().contains("stale score"), "{error}");
+}
+
+#[test]
+fn missing_and_unknown_pairs_are_errors() {
+    let mut pairs = loaded();
+    let removed = pairs.pop().unwrap();
+    let error = load_scores(scores_path(), &pairs).unwrap_err();
+    assert!(error.to_string().contains(&removed.id), "{error}");
+
+    let mut pairs = loaded();
+    let mut extra = pairs[0].clone();
+    extra.id = "extra".into();
+    pairs.push(extra);
+    let error = load_scores(scores_path(), &pairs).unwrap_err();
+    assert!(error.to_string().contains("extra"), "{error}");
+}
+
+// The number guards must beat. If this changes, the scores or pairs changed.
+#[test]
+fn threshold_only_baseline_is_pinned() {
+    let pairs = loaded();
+    let scores = load_scores(scores_path(), &pairs).unwrap();
+    let mut counts = Counts::default();
+    for pair in pairs.iter().filter(|pair| pair.split == Split::Tuning) {
+        counts.record(pair.label, scores[&pair.id] >= 0.90);
+    }
+    assert_eq!(counts.false_hits, 36);
+    assert_eq!(counts.correct_hits, 72);
+    assert_eq!(counts.should_hit, 80);
+}
 
 const CATEGORIES: [&str; 8] = [
     "number",
