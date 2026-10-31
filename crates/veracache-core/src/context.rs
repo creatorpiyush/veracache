@@ -45,7 +45,7 @@ pub fn context_fingerprint(messages: &[ChatMessage], mode: ContextMode) -> Optio
     Some(*hasher.finalize().as_bytes())
 }
 
-fn is_system(message: &ChatMessage) -> bool {
+pub(crate) fn is_system(message: &ChatMessage) -> bool {
     matches!(message.role.as_str(), "system" | "developer")
 }
 
