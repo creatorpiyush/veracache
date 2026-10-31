@@ -16,8 +16,11 @@ local = ["dep:fastembed", "dep:tokio"]
 async-trait.workspace = true
 blake3.workspace = true
 fastembed = { workspace = true, optional = true }
+reqwest.workspace = true
+serde_json.workspace = true
 tokio = { workspace = true, features = ["rt"], optional = true }
 veracache-core.workspace = true
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros", "rt"] }
+wiremock.workspace = true
