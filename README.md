@@ -78,7 +78,7 @@ See [paraphrase.rs](crates/veracache/examples/paraphrase.rs) for the API.
 | Linux x64 and arm64 (musl) | No | Yes |
 | macOS x64 | No | Yes |
 
-ONNX Runtime has no prebuilt binaries for the last two rows. Build those targets with `--no-default-features` and use the remote embedder.
+ONNX Runtime has no prebuilt binaries for the last two rows. Build those targets with `--no-default-features` and use the remote embedder. That build is expected to work, but the full library has not been tested on them yet.
 
 ## Results
 
