@@ -137,12 +137,12 @@ upstream response
   ▼
 cacheable? ── no ──► done
   ▼
-reuse analysis and embedding from the lookup
+embed (served by the embedder's LRU)
   ▼
 store.upsert(entry) ── error ──► count it, done
 ```
 
-Reusing lookup work means a miss embeds once. Concurrent identical misses may each call upstream and overwrite the same entry, which wastes cost but serves no wrong answer, so it is accepted for v0.1.
+`get` and `set` are separate calls that share no state, so `set` asks for the embedding again. The embedder's LRU, keyed by normalized text, returns the vector computed during lookup, which keeps the public API simple. Concurrent identical misses may each call upstream and overwrite the same entry, which wastes cost but serves no wrong answer, so it is accepted for v0.1.
 
 ## 7. Namespace
 
