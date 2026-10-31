@@ -6,6 +6,7 @@
 use std::sync::Arc;
 
 pub use veracache_core::*;
+pub use veracache_embed::*;
 pub use veracache_store::MemoryStore;
 
 /// Creates a cache backed by an in-process store.

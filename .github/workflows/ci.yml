@@ -33,9 +33,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
-      - run: rustup toolchain install 1.85 --profile minimal
+      - run: rustup toolchain install 1.92 --profile minimal
       # The explicit toolchain overrides rust-toolchain.toml.
-      - run: cargo +1.85 check --workspace
+      - run: cargo +1.92 check --workspace
 
   deny:
     runs-on: ubuntu-latest

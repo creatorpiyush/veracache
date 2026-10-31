@@ -1,3 +1,4 @@
-/target
+target/
+.fastembed_cache/
 .DS_Store
 .env

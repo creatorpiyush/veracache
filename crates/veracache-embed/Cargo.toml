@@ -8,5 +8,16 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
+[features]
+default = ["local"]
+local = ["dep:fastembed", "dep:tokio"]
+
 [dependencies]
+async-trait.workspace = true
+blake3.workspace = true
+fastembed = { workspace = true, optional = true }
+tokio = { workspace = true, features = ["rt"], optional = true }
 veracache-core.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt"] }

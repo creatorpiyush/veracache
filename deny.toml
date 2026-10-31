@@ -1,3 +1,9 @@
+[advisories]
+ignore = [
+    # Unmaintained, not vulnerable. Build-time macro pulled in by tokenizers.
+    { id = "RUSTSEC-2024-0436", reason = "paste is a transitive dependency of fastembed with no replacement upstream" },
+]
+
 [licenses]
 allow = [
     "Apache-2.0",
@@ -7,6 +13,11 @@ allow = [
     "MIT",
     "Unicode-3.0",
     "Zlib",
+]
+# Unmodified transitive dependencies of fastembed.
+exceptions = [
+    { allow = ["MPL-2.0"], crate = "option-ext" },
+    { allow = ["CDLA-Permissive-2.0"], crate = "webpki-roots" },
 ]
 
 [bans]
