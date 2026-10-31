@@ -67,6 +67,25 @@ pub async fn run<S: VectorStore>(make: impl Fn(Clock) -> S) {
 
     let (time, clock) = TestClock::new();
     expired_entries_are_never_returned(&make(clock), &time).await;
+
+    let (time, clock) = TestClock::new();
+    expired_entries_do_not_crowd_out_live_ones(&make(clock), &time).await;
+}
+
+async fn expired_entries_do_not_crowd_out_live_ones(store: &impl VectorStore, time: &TestClock) {
+    for id in 1..=30u8 {
+        let angle = f32::from(id) * 0.01;
+        let mut item = entry(id, NS_A, vec![angle.cos(), angle.sin()]);
+        if id <= 20 {
+            item.ttl = Some(Duration::from_secs(10));
+        }
+        store.upsert(item).await.unwrap();
+    }
+
+    time.set(1_100);
+    let found = store.search(&NS_A, &[1.0, 0.0], 5).await.unwrap();
+    let ids: Vec<_> = found.iter().map(|c| c.entry.id.0).collect();
+    assert_eq!(ids, [21, 22, 23, 24, 25]);
 }
 
 async fn exact_is_scoped_to_namespace(store: &impl VectorStore) {
