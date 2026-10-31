@@ -86,6 +86,30 @@ fn number_guard_stops_number_false_hits_and_keeps_true_hits() {
     assert_eq!(guarded.correct_hits, plain.correct_hits);
 }
 
+#[test]
+fn date_guard_stops_date_false_hits_and_keeps_true_hits() {
+    let (plain, guarded) = tuning_counts("date");
+    assert!(plain.false_hits > 0);
+    assert_eq!(guarded.false_hits, 0);
+    assert_eq!(guarded.correct_hits, plain.correct_hits);
+}
+
+#[test]
+fn negation_guard_stops_negation_false_hits_and_keeps_true_hits() {
+    let (plain, guarded) = tuning_counts("negation");
+    assert!(plain.false_hits > 0);
+    assert_eq!(guarded.false_hits, 0);
+    assert_eq!(guarded.correct_hits, plain.correct_hits);
+}
+
+#[test]
+fn direction_guard_stops_direction_false_hits_and_keeps_true_hits() {
+    let (plain, guarded) = tuning_counts("direction");
+    assert!(plain.false_hits > 0);
+    assert_eq!(guarded.false_hits, 0);
+    assert_eq!(guarded.correct_hits, plain.correct_hits);
+}
+
 const CATEGORIES: [&str; 8] = [
     "number",
     "date",
