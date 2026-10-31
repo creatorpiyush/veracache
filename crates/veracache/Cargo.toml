@@ -13,3 +13,8 @@ veracache-core.workspace = true
 veracache-embed.workspace = true
 veracache-guard.workspace = true
 veracache-store.workspace = true
+
+[dev-dependencies]
+async-trait.workspace = true
+serde_json.workspace = true
+tokio = { workspace = true, features = ["macros", "rt"] }
