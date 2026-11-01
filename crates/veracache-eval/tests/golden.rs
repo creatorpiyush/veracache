@@ -63,6 +63,35 @@ fn threshold_only_baseline_is_pinned() {
 
 /// Tuning-split outcomes for one category, with and without guards, at 0.90.
 fn tuning_counts(category: &str) -> (Counts, Counts) {
+    tuning_counts_at(category, 0.90)
+}
+
+/// Asserts a category has false hits without guards and none with them, and
+/// keeps every true hit.
+fn assert_guarded_at(category: &str, threshold: f32) {
+    let (plain, guarded) = tuning_counts_at(category, threshold);
+    assert!(plain.false_hits > 0, "{category}");
+    assert_eq!(guarded.false_hits, 0, "{category}");
+    assert_eq!(guarded.correct_hits, plain.correct_hits, "{category}");
+}
+
+// 0.90 hides these categories: similarity alone separates them there.
+#[test]
+fn entity_guard_works_below_the_default_threshold() {
+    assert_guarded_at("entity", 0.80);
+}
+
+#[test]
+fn quote_guard_works_below_the_default_threshold() {
+    assert_guarded_at("quote", 0.80);
+}
+
+#[test]
+fn length_guard_works_below_the_default_threshold() {
+    assert_guarded_at("length", 0.80);
+}
+
+fn tuning_counts_at(category: &str, threshold: f32) -> (Counts, Counts) {
     let pairs = loaded();
     let scores = load_scores(scores_path(), &pairs).unwrap();
     let guards = default_guards();
@@ -70,8 +99,8 @@ fn tuning_counts(category: &str) -> (Counts, Counts) {
     for pair in &pairs {
         if pair.split == Split::Tuning && pair.category == category {
             let score = scores[&pair.id];
-            plain.record(pair.label, score >= 0.90);
-            let served = serves(pair, score, 0.90, &EnglishAnalyzer, &guards);
+            plain.record(pair.label, score >= threshold);
+            let served = serves(pair, score, threshold, &EnglishAnalyzer, &guards);
             guarded.record(pair.label, served);
         }
     }
