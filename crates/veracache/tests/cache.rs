@@ -99,6 +99,7 @@ fn request<'a>(tenant: &'a str, messages: &'a [ChatMessage]) -> CacheRequest<'a>
         tools: &Value::Null,
         response_format: &Value::Null,
         version_tag: "",
+        route: "",
     }
 }
 

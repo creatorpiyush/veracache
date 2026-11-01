@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-Early development: exact and semantic lookup, both embedders, and the memory store work. Guards, eval, the proxy, other stores, and bindings are not built. The design is in `ARCH.md`.
+Early development: exact and semantic lookup, guards, decision records, both embedders, and the memory store work. The eval CLI, the proxy, other stores, and bindings are not built. The design is in `ARCH.md`.
 
 ## What this is
 
