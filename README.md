@@ -88,10 +88,10 @@ Lookup latency at 100k entries, from `cargo bench -p veracache --bench lookup`:
 
 | Bench | Mean |
 |---|---|
-| Exact hit | 1.2µs |
-| Semantic hit | 68µs |
+| Exact hit | 1.3µs |
+| Semantic hit | 78µs |
 
-These are early numbers from an Apple M4 Pro, with synthetic vectors, a fake embedder, and no guards. Expect semantic lookup to be slower with guards on.
+These are early numbers from an Apple M4 Pro, with synthetic vectors and a fake embedder. Semantic lookups run the default guards, but on two-word prompts, so real prompts will cost more.
 
 ## Roadmap
 

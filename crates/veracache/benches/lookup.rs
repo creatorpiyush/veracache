@@ -1,7 +1,7 @@
 //! Lookup latency at 100k entries, excluding real embedding and upstream time.
 //!
-//! The fake embedder only clones a precomputed vector. Guards are not in the
-//! pipeline yet, so these numbers will rise when they are.
+//! The fake embedder only clones a precomputed vector. Semantic lookups run the
+//! default guards.
 
 use std::collections::HashMap;
 use std::hint::black_box;
@@ -61,6 +61,15 @@ impl Embedder for FixedEmbedder {
     }
 }
 
+/// Spells `i` in letters, because digits in a prompt would trip `NumberGuard`.
+fn label(prefix: &str, i: usize) -> String {
+    let letters: String = format!("{i:06}")
+        .bytes()
+        .map(|digit| (digit - b'0' + b'a') as char)
+        .collect();
+    format!("{prefix} {letters}")
+}
+
 fn messages(text: String) -> Vec<ChatMessage> {
     vec![ChatMessage {
         role: "user".into(),
@@ -87,13 +96,10 @@ fn filled_cache(runtime: &Runtime) -> (Cache, Vec<Vec<ChatMessage>>) {
 
     let mut vectors = HashMap::new();
     for i in 0..ENTRIES {
-        vectors.insert(
-            format!("stored {i}"),
-            rng.near(&centers[i % CLUSTERS], 0.02),
-        );
+        vectors.insert(label("stored", i), rng.near(&centers[i % CLUSTERS], 0.02));
     }
     for i in 0..QUERIES {
-        vectors.insert(format!("query {i}"), rng.near(&centers[i % CLUSTERS], 0.02));
+        vectors.insert(label("query", i), rng.near(&centers[i % CLUSTERS], 0.02));
     }
 
     let config = CacheConfig {
@@ -103,7 +109,7 @@ fn filled_cache(runtime: &Runtime) -> (Cache, Vec<Vec<ChatMessage>>) {
     let cache = memory_cache(Arc::new(FixedEmbedder(vectors)), config);
     runtime.block_on(async {
         for i in 0..ENTRIES {
-            let stored = messages(format!("stored {i}"));
+            let stored = messages(label("stored", i));
             let response = vec![0; 512];
             let meta = ResponseMeta::default();
             cache
@@ -113,9 +119,7 @@ fn filled_cache(runtime: &Runtime) -> (Cache, Vec<Vec<ChatMessage>>) {
     });
     assert_eq!(cache.error_count(), 0);
 
-    let queries = (0..QUERIES)
-        .map(|i| messages(format!("query {i}")))
-        .collect();
+    let queries = (0..QUERIES).map(|i| messages(label("query", i))).collect();
     (cache, queries)
 }
 
@@ -123,14 +127,20 @@ fn lookup(c: &mut Criterion) {
     let runtime = Builder::new_current_thread().build().unwrap();
     let (cache, queries) = filled_cache(&runtime);
 
-    let stored = messages("stored 12345".into());
+    let stored = messages(label("stored", 12345));
     assert!(runtime.block_on(cache.get(&request(&stored))).is_some());
     c.bench_function("exact_hit_100k", |b| {
         b.iter(|| runtime.block_on(cache.get(black_box(&request(&stored)))));
     });
 
     let mut next = queries.iter().cycle();
-    assert!(runtime.block_on(cache.get(&request(&queries[0]))).is_some());
+    // HNSW is approximate and these clusters are tight, so a few queries miss.
+    // A low hit count would mean this bench is timing misses, not hits.
+    let hits = queries
+        .iter()
+        .filter(|query| runtime.block_on(cache.get(&request(query))).is_some())
+        .count();
+    assert!(hits * 100 >= QUERIES * 95, "{hits} of {QUERIES} hit");
     c.bench_function("semantic_hit_100k", |b| {
         b.iter(|| {
             let query = next.next().unwrap();
