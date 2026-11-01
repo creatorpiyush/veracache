@@ -37,10 +37,9 @@ jobs:
       # The explicit toolchain overrides rust-toolchain.toml.
       - run: cargo +1.92 check --workspace
 
-  # Reports numbers in the job log. Never blocks.
+  # Reports numbers in the job log. Runs on push only, so it never blocks a PR.
   bench:
     if: github.event_name == 'push'
-    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
