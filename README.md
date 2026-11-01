@@ -2,7 +2,7 @@
 
 **A semantic cache for LLMs where a hit must be proven safe, not just similar.**
 
-> **Status: early development.** The core cache works as a Rust library, but it is not published and **has no guards yet, so it can still return false hits. Do not use it for real answers.** Guards are the next milestone.
+> **Status: early development.** The core cache works as a Rust library, but it is not published and **only checks English prompts, so other languages can still return false hits. Do not use it for real answers yet.**
 
 ## The problem
 
@@ -32,7 +32,8 @@ If veracache cannot show a hit is safe, it treats it as a miss. A miss costs a l
 
 ## Works today
 
-- **Exact and semantic lookup** in a Rust library. The guard step above is not built yet.
+- **Exact and semantic lookup** in a Rust library, with all seven guards on by default. Guards can be set per route.
+- **Decision records**: every lookup reports its candidates, scores, reject reasons, and outcome.
 - **Isolation**: a hit never crosses tenant, model, embedder, system prompt, tool schema, or conversation history.
 - **Local embedding**: runs bge-small-en-v1.5 in-process, offline once the model is downloaded.
 - **Remote embedding**: any OpenAI-compatible `/embeddings` API.
@@ -82,7 +83,23 @@ ONNX Runtime has no prebuilt binaries for the last two rows. Build those targets
 
 ## Results
 
-No false-hit numbers yet. They will be published here with the command that reproduces them, once guards exist.
+False-hit results on the held-out golden split, which was run once after tuning: 48 pairs, 24 should-hit and 24 should-miss, at threshold 0.88 with bge-small-en-v1.5.
+
+| Category | False-hit rate, threshold only | False-hit rate, guarded | Hit recall, threshold only | Hit recall, guarded |
+|---|---|---|---|---|
+| date | 40.0% | 0.0% | 100.0% | 100.0% |
+| direction | 50.0% | 0.0% | 100.0% | 100.0% |
+| entity | 0.0% | 0.0% | 100.0% | 100.0% |
+| follow_up | 60.0% | 0.0% | 66.7% | 66.7% |
+| length | 0.0% | 0.0% | 100.0% | 100.0% |
+| negation | 50.0% | 0.0% | 100.0% | 66.7% |
+| number | 40.0% | 0.0% | 100.0% | 100.0% |
+| quote | 0.0% | 0.0% | 100.0% | 100.0% |
+| **All** | **36.1%** | **0.0%** | **95.8%** | **91.7%** |
+
+Reproduce with `cargo run -p veracache-eval --example guarded held_out 0.88`.
+
+Read these numbers with care. The suite is small and self-authored, so 13 false hits stopped is not a production false-hit rate. At 0.88, similarity alone stops every entity, quote, and length false hit in this split, so it does not exercise those three guards. Run your own logs before trusting it; the eval CLI for that is Phase 3.
 
 Lookup latency at 100k entries, from `cargo bench -p veracache --bench lookup`:
 
@@ -99,8 +116,8 @@ These are early numbers from an Apple M4 Pro, with synthetic vectors and a fake 
 |---|---|---|
 | 0 | Workspace, CI, project skeleton | Done |
 | 1 | Core cache: exact and semantic lookup, embedders, memory store | Done |
-| 2 | Guard pipeline and golden test suite | Next |
-| 3 | Eval CLI | Planned |
+| 2 | Guard pipeline and golden test suite | Done |
+| 3 | Eval CLI | Next |
 | 4 | OpenAI-compatible proxy | Planned |
 | 5 | SQLite, Redis, and pgvector backends | Planned |
 | 6 | Node and Python packages | Planned |

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, SystemTime};
@@ -7,8 +8,8 @@ use serde_json::Value;
 use crate::context::is_system;
 use crate::{
     Analyzed, Analyzer, CacheEntry, ChatMessage, ContextMode, Embedder, EntryId, EntryStats, Error,
-    Guard, Namespace, NamespaceParts, ResponseMeta, Result, VectorStore, context_fingerprint,
-    key_hash, normalize,
+    Guard, Namespace, NamespaceParts, RejectReason, ResponseMeta, Result, VectorStore,
+    context_fingerprint, key_hash, normalize,
 };
 
 /// Lookup settings.
@@ -25,7 +26,7 @@ pub struct CacheConfig {
 impl Default for CacheConfig {
     fn default() -> Self {
         Self {
-            threshold: 0.9,
+            threshold: 0.88,
             k: 5,
             context_mode: ContextMode::default(),
         }
@@ -47,6 +48,9 @@ pub struct CacheRequest<'a> {
     pub response_format: &'a Value,
     /// User-supplied cache version tag.
     pub version_tag: &'a str,
+    /// Route, which selects its guards. Take it from server configuration,
+    /// never from client input, or a client could turn guards off.
+    pub route: &'a str,
 }
 
 /// Optional settings for a stored response.
@@ -71,6 +75,45 @@ pub struct Hit {
     pub exact: bool,
 }
 
+/// What one candidate went through during a lookup.
+#[derive(Debug, Clone, PartialEq)]
+pub struct CandidateTrace {
+    /// The candidate's entry.
+    pub id: EntryId,
+    /// Similarity to the query.
+    pub score: f32,
+    /// Every guard rejection. Empty if guards did not run or all passed.
+    pub rejects: Vec<RejectReason>,
+    /// Whether this candidate became the hit.
+    pub accepted: bool,
+}
+
+/// How a lookup ended.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Outcome {
+    /// The conversation is not cacheable.
+    Bypassed,
+    /// The exact path hit, so no guard ran.
+    ExactHit,
+    /// A candidate passed the threshold and every guard.
+    SemanticHit,
+    /// Nothing survived.
+    Miss,
+    /// A cache failure, turned into a miss.
+    Failed(String),
+}
+
+/// The record of one lookup. Holds no response bytes.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Decision {
+    /// Similarity threshold applied.
+    pub threshold: f32,
+    /// Candidates from vector search, best score first.
+    pub candidates: Vec<CandidateTrace>,
+    /// How the lookup ended.
+    pub outcome: Outcome,
+}
+
 struct Key {
     namespace: Namespace,
     key_hash: [u8; 32],
@@ -83,6 +126,7 @@ pub struct Cache {
     store: Arc<dyn VectorStore>,
     analyzer: Arc<dyn Analyzer>,
     guards: Vec<Arc<dyn Guard>>,
+    route_guards: HashMap<String, Vec<Arc<dyn Guard>>>,
     config: CacheConfig,
     errors: AtomicU64,
 }
@@ -101,21 +145,61 @@ impl Cache {
             store,
             analyzer,
             guards,
+            route_guards: HashMap::new(),
             config,
             errors: AtomicU64::new(0),
         }
     }
 
+    /// Replaces the guards for one route. Other routes keep the default list,
+    /// so an unknown route is never less guarded than the default.
+    pub fn with_route_guards(
+        mut self,
+        route: impl Into<String>,
+        guards: Vec<Arc<dyn Guard>>,
+    ) -> Self {
+        self.route_guards.insert(route.into(), guards);
+        self
+    }
+
     /// Looks up a request. `None` means call upstream.
     pub async fn get(&self, request: &CacheRequest<'_>) -> Option<Hit> {
-        let key = self.key(request)?;
-        match self.lookup(&key).await {
+        self.decide(request).await.1
+    }
+
+    /// Looks up a request and reports how the decision was reached.
+    pub async fn decide(&self, request: &CacheRequest<'_>) -> (Decision, Option<Hit>) {
+        let (decision, hit) = self.run(request).await;
+        tracing::debug!(
+            target: "veracache::decision",
+            threshold = decision.threshold,
+            outcome = ?decision.outcome,
+            candidates = ?decision.candidates,
+            "lookup",
+        );
+        (decision, hit)
+    }
+
+    async fn run(&self, request: &CacheRequest<'_>) -> (Decision, Option<Hit>) {
+        let mut decision = Decision {
+            threshold: self.config.threshold,
+            candidates: Vec::new(),
+            outcome: Outcome::Bypassed,
+        };
+        let Some(key) = self.key(request) else {
+            return (decision, None);
+        };
+        let guards = self.route_guards.get(request.route);
+        let guards = guards.unwrap_or(&self.guards);
+        let hit = match self.lookup(&key, guards, &mut decision).await {
             Ok(hit) => hit,
-            Err(_) => {
+            Err(error) => {
                 self.errors.fetch_add(1, Ordering::Relaxed);
+                decision.outcome = Outcome::Failed(error.to_string());
                 None
             }
-        }
+        };
+        (decision, hit)
     }
 
     /// Stores an upstream response. Uncacheable conversations are skipped.
@@ -173,8 +257,14 @@ impl Cache {
         })
     }
 
-    async fn lookup(&self, key: &Key) -> Result<Option<Hit>> {
+    async fn lookup(
+        &self,
+        key: &Key,
+        guards: &[Arc<dyn Guard>],
+        decision: &mut Decision,
+    ) -> Result<Option<Hit>> {
         if let Some(entry) = self.store.get_exact(&key.namespace, &key.key_hash).await? {
+            decision.outcome = Outcome::ExactHit;
             return Ok(Some(Hit {
                 entry,
                 score: 1.0,
@@ -188,27 +278,56 @@ impl Cache {
             .store
             .search(&key.namespace, &vector, self.config.k)
             .await?;
-        Ok(candidates
-            .into_iter()
-            .filter(|candidate| candidate.score >= self.config.threshold)
-            .find(|candidate| self.is_safe(&query, &candidate.entry))
-            .map(|candidate| Hit {
-                entry: candidate.entry,
+
+        let mut hit = None;
+        for candidate in candidates {
+            let eligible = hit.is_none() && candidate.score >= self.config.threshold;
+            let rejects = if eligible {
+                self.rejects(&query, &candidate.entry, guards)
+            } else {
+                Vec::new()
+            };
+            let accepted = eligible && rejects.is_empty();
+            decision.candidates.push(CandidateTrace {
+                id: candidate.entry.id,
                 score: candidate.score,
-                exact: false,
-            }))
+                rejects,
+                accepted,
+            });
+            if accepted {
+                hit = Some(Hit {
+                    entry: candidate.entry,
+                    score: candidate.score,
+                    exact: false,
+                });
+            }
+        }
+        decision.outcome = if hit.is_some() {
+            Outcome::SemanticHit
+        } else {
+            Outcome::Miss
+        };
+        Ok(hit)
     }
 
-    // A candidate that cannot be checked is rejected, never assumed safe.
-    fn is_safe(&self, query: &Analyzed, entry: &CacheEntry) -> bool {
+    // A candidate that cannot be checked is rejected, never assumed safe. All
+    // guards run, so the record shows every reason and not only the first.
+    fn rejects(
+        &self,
+        query: &Analyzed,
+        entry: &CacheEntry,
+        guards: &[Arc<dyn Guard>],
+    ) -> Vec<RejectReason> {
         let Some(features) = &entry.analyzed else {
-            return false;
+            return vec![RejectReason::new("features", "missing")];
         };
-        features.feature_version == self.analyzer.feature_version()
-            && self
-                .guards
-                .iter()
-                .all(|guard| guard.check(query, features).is_ok())
+        if features.feature_version != self.analyzer.feature_version() {
+            return vec![RejectReason::new("features", "version mismatch")];
+        }
+        guards
+            .iter()
+            .filter_map(|guard| guard.check(query, features).err())
+            .collect()
     }
 
     async fn store_entry(
@@ -277,7 +396,7 @@ mod tests {
     use serde_json::json;
 
     use super::*;
-    use crate::{Candidate, DeleteFilter, Feedback, RejectReason};
+    use crate::{Candidate, DeleteFilter, Feedback};
 
     #[derive(Default)]
     struct FakeEmbedder {
@@ -489,12 +608,14 @@ mod tests {
             tools: &Value::Null,
             response_format: &Value::Null,
             version_tag: "",
+            route: "",
         }
     }
 
     #[test]
     fn default_config_matches_the_spec() {
         let config = CacheConfig::default();
+        assert_eq!(config.threshold, 0.88);
         assert_eq!(config.k, 5);
         assert_eq!(config.context_mode, ContextMode::SingleTurn);
     }
@@ -790,6 +911,51 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn a_guard_left_off_a_route_does_not_veto_there() {
+        let mut harness = Harness::guarded(loose(), vec![VetoWord::new("stored")]);
+        harness.cache = harness.cache.with_route_guards("/open", Vec::new());
+        stored_with_score(&harness, &["stored"]).await;
+
+        let query = [msg("user", "query")];
+        let open = CacheRequest {
+            route: "/open",
+            ..request(&query)
+        };
+        assert!(harness.cache.get(&open).await.is_some());
+        assert_eq!(harness.cache.get(&request(&query)).await, None);
+    }
+
+    #[tokio::test]
+    async fn a_route_can_add_a_guard_the_default_lacks() {
+        let mut harness = Harness::guarded(loose(), Vec::new());
+        let strict: Vec<Arc<dyn Guard>> = vec![VetoWord::new("stored")];
+        harness.cache = harness.cache.with_route_guards("/strict", strict);
+        stored_with_score(&harness, &["stored"]).await;
+
+        let query = [msg("user", "query")];
+        let vetoed = CacheRequest {
+            route: "/strict",
+            ..request(&query)
+        };
+        assert_eq!(harness.cache.get(&vetoed).await, None);
+        assert!(harness.cache.get(&request(&query)).await.is_some());
+    }
+
+    #[tokio::test]
+    async fn an_unknown_route_keeps_the_default_guards() {
+        let mut harness = Harness::guarded(loose(), vec![VetoWord::new("stored")]);
+        harness.cache = harness.cache.with_route_guards("/open", Vec::new());
+        stored_with_score(&harness, &["stored"]).await;
+
+        let query = [msg("user", "query")];
+        let unknown = CacheRequest {
+            route: "/other",
+            ..request(&query)
+        };
+        assert_eq!(harness.cache.get(&unknown).await, None);
+    }
+
+    #[tokio::test]
     async fn guards_see_the_query_and_candidate_features() {
         let guard = VetoWord::new("nothing");
         let harness = Harness::guarded(loose(), vec![guard.clone()]);
@@ -874,6 +1040,116 @@ mod tests {
 
         let query = [msg("user", "query")];
         assert_eq!(harness.cache.get(&request(&query)).await, None);
+    }
+
+    #[tokio::test]
+    async fn decision_records_a_rejected_then_an_accepted_candidate() {
+        let harness = Harness::guarded(loose(), vec![VetoWord::new("blocked")]);
+        stored_with_score(&harness, &["blocked one", "safe two"]).await;
+        let ids: Vec<_> = harness
+            .store
+            .entries
+            .lock()
+            .unwrap()
+            .iter()
+            .map(|e| e.id)
+            .collect();
+
+        let query = [msg("user", "query")];
+        let (decision, hit) = harness.cache.decide(&request(&query)).await;
+
+        assert_eq!(hit.unwrap().entry.id, ids[1]);
+        assert_eq!(
+            decision,
+            Decision {
+                threshold: 0.5,
+                candidates: vec![
+                    CandidateTrace {
+                        id: ids[0],
+                        score: 0.9,
+                        rejects: vec![RejectReason::new("veto_word", "blocked")],
+                        accepted: false,
+                    },
+                    CandidateTrace {
+                        id: ids[1],
+                        score: 0.9,
+                        rejects: Vec::new(),
+                        accepted: true,
+                    },
+                ],
+                outcome: Outcome::SemanticHit,
+            }
+        );
+    }
+
+    #[tokio::test]
+    async fn decision_lists_every_guard_that_rejected() {
+        let guards: Vec<Arc<dyn Guard>> = vec![VetoWord::new("one"), VetoWord::new("two")];
+        let harness = Harness::guarded(loose(), guards);
+        stored_with_score(&harness, &["one two"]).await;
+
+        let query = [msg("user", "query")];
+        let (decision, _) = harness.cache.decide(&request(&query)).await;
+
+        assert_eq!(decision.outcome, Outcome::Miss);
+        assert_eq!(
+            decision.candidates[0].rejects,
+            [
+                RejectReason::new("veto_word", "one"),
+                RejectReason::new("veto_word", "two"),
+            ]
+        );
+    }
+
+    #[tokio::test]
+    async fn decision_records_a_candidate_below_threshold_unguarded() {
+        let harness = Harness::guarded(loose(), vec![VetoWord::new("stored")]);
+        stored_with_score(&harness, &["stored"]).await;
+        *harness.store.score.lock().unwrap() = 0.1;
+
+        let query = [msg("user", "query")];
+        let (decision, _) = harness.cache.decide(&request(&query)).await;
+
+        let trace = &decision.candidates[0];
+        assert_eq!((trace.score, trace.accepted), (0.1, false));
+        assert!(trace.rejects.is_empty());
+        assert_eq!(decision.outcome, Outcome::Miss);
+    }
+
+    #[tokio::test]
+    async fn decision_names_why_a_candidate_could_not_be_checked() {
+        let harness = Harness::guarded(loose(), Vec::new());
+        stored_with_score(&harness, &["stored"]).await;
+        harness.store.entries.lock().unwrap()[0].analyzed = None;
+
+        let query = [msg("user", "query")];
+        let (decision, _) = harness.cache.decide(&request(&query)).await;
+        assert_eq!(decision.candidates[0].rejects[0].guard, "features");
+
+        stored_with_score(&harness, &["stored"]).await;
+        harness.store.entries.lock().unwrap().remove(0);
+        harness.analyzer.version.store(1, Ordering::SeqCst);
+        let (decision, _) = harness.cache.decide(&request(&query)).await;
+        assert_eq!(decision.candidates[0].rejects[0].detail, "version mismatch");
+    }
+
+    #[tokio::test]
+    async fn decision_records_exact_bypassed_and_failed_lookups() {
+        let harness = Harness::new(CacheConfig::default());
+        let messages = [msg("user", "hello")];
+        harness.set(&request(&messages)).await;
+        let (decision, _) = harness.cache.decide(&request(&messages)).await;
+        assert_eq!(decision.outcome, Outcome::ExactHit);
+
+        let multi = [msg("user", "a"), msg("assistant", "b"), msg("user", "c")];
+        let (decision, _) = harness.cache.decide(&request(&multi)).await;
+        assert_eq!(decision.outcome, Outcome::Bypassed);
+
+        harness.analyzer.failing.store(true, Ordering::SeqCst);
+        let query = [msg("user", "query")];
+        let (decision, hit) = harness.cache.decide(&request(&query)).await;
+        assert!(matches!(decision.outcome, Outcome::Failed(_)));
+        assert_eq!(hit, None);
     }
 
     #[tokio::test]

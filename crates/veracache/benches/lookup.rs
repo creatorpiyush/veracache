@@ -85,6 +85,7 @@ fn request(messages: &[ChatMessage]) -> CacheRequest<'_> {
         tools: &Value::Null,
         response_format: &Value::Null,
         version_tag: "",
+        route: "",
     }
 }
 
