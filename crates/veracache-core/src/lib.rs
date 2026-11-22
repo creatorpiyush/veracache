@@ -20,6 +20,6 @@ pub use pipeline::{
 };
 pub use traits::{Analyzer, Embedder, Guard, Reranker, VectorStore};
 pub use types::{
-    Analyzed, CacheEntry, Candidate, DeleteFilter, EntryId, EntryStats, Feedback, Namespace,
-    RejectReason, ResponseMeta,
+    Analyzed, CacheEntry, Candidate, DeleteFilter, EntryId, EntryStats, Feedback, LanguageCheck,
+    Namespace, RejectReason, ResponseMeta,
 };

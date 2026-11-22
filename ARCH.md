@@ -1,6 +1,6 @@
 # Architecture: veracache
 
-Status: partly built. The lookup pipeline with guards, decision records, both embedders, and the memory store exist. Everything else here is design.
+Status: partly built. The lookup pipeline with guards, the English language check, decision records, both embedders, and the memory store exist. Everything else here is design.
 
 ## 1. Overview
 
@@ -36,7 +36,7 @@ Dependencies point one way, toward `veracache-core`.
 | `veracache-core` | `Embedder`, `VectorStore`, `Guard`, `Analyzer`, `Reranker` traits; `Analyzed`, `CacheEntry`, `Namespace`; normalization; pipeline | none |
 | `veracache-embed` | fastembed and HTTP embedders, LRU | core |
 | `veracache-store` | memory, sqlite, redis, pgvector stores; conformance suite | core |
-| `veracache-guard` | English analyzer, seven guards | core |
+| `veracache-guard` | English analyzer with language check, seven guards | core |
 | `veracache` | `Cache` API, config, default composition | core, embed, store, guard |
 | `veracache-eval` | Replay, sweep, recommendation, reports | veracache |
 | `veracache-proxy` | axum server, SSE tee and replay, admin endpoints | veracache |

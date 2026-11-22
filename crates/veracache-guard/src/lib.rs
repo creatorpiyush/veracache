@@ -7,6 +7,7 @@ mod analyzer;
 mod date;
 mod direction;
 mod entity;
+mod language;
 mod length;
 mod names;
 mod negation;

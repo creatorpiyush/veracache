@@ -25,7 +25,7 @@ impl FakeEmbedder {
                 ("what is the capital of France?", vec![1.0, 0.0]),
                 ("tell me the capital of France", vec![3.0, 0.3]),
                 ("how do I bake bread?", vec![0.0, 1.0]),
-                ("zero vector", vec![0.0, 0.0]),
+                ("what is the zero vector?", vec![0.0, 0.0]),
             ]),
             failing: AtomicBool::new(false),
         })
@@ -276,7 +276,7 @@ async fn store_failure_is_a_counted_miss() {
 #[tokio::test]
 async fn zero_vector_is_a_counted_miss() {
     let cache = memory_cache(FakeEmbedder::new(), CacheConfig::default());
-    let messages = user("zero vector");
+    let messages = user("what is the zero vector?");
     assert_eq!(cache.get(&request("a", &messages)).await, None);
     assert_eq!(cache.error_count(), 1);
 }

@@ -206,3 +206,47 @@
 {"id": "follow_up-miss-11", "category": "follow_up", "label": "miss", "split": "held_out", "a": "Which is better?", "b": "Which is better?", "a_history": ["Compare tea and coffee.", "Both contain caffeine."], "b_history": ["Compare Rust and Go.", "Both are compiled."]}
 {"id": "follow_up-miss-12", "category": "follow_up", "label": "miss", "split": "held_out", "a": "Where is it?", "b": "Where is it?", "a_history": ["What is the tallest mountain?", "Mount Everest."], "b_history": ["What is the longest river?", "The Nile."]}
 {"id": "follow_up-miss-13", "category": "follow_up", "label": "miss", "split": "held_out", "a": "Who wrote it?", "b": "Who wrote it?", "a_history": [], "b_history": ["What is the most read novel?", "Don Quixote."]}
+{"id": "language-hit-01", "category": "language", "lang": "hi", "label": "hit", "split": "tuning", "a": "भारत की राजधानी क्या है?", "b": "भारत की राजधानी कौन सी है?"}
+{"id": "language-hit-02", "category": "language", "lang": "hi", "label": "hit", "split": "tuning", "a": "मुझे अच्छी नींद के लिए कुछ सुझाव दो", "b": "अच्छी नींद के लिए कुछ टिप्स बताइए"}
+{"id": "language-hit-03", "category": "language", "lang": "hi", "label": "hit", "split": "held_out", "a": "चाय कैसे बनाते हैं?", "b": "चाय बनाने का तरीका क्या है?"}
+{"id": "language-miss-01", "category": "language", "lang": "hi", "label": "miss", "split": "tuning", "a": "तीन दिन में दिल्ली में क्या घूमें?", "b": "पाँच दिन में दिल्ली में क्या घूमें?"}
+{"id": "language-miss-02", "category": "language", "lang": "hi", "label": "miss", "split": "tuning", "a": "दिल्ली से मुंबई की ट्रेन कब है?", "b": "मुंबई से दिल्ली की ट्रेन कब है?"}
+{"id": "language-miss-03", "category": "language", "lang": "hi", "label": "miss", "split": "held_out", "a": "२०२३ में भारत की जीडीपी कितनी थी?", "b": "२०२४ में भारत की जीडीपी कितनी थी?"}
+{"id": "language-hit-04", "category": "language", "lang": "es", "label": "hit", "split": "tuning", "a": "¿Cuál es la capital de Australia?", "b": "¿Qué ciudad es la capital de Australia?"}
+{"id": "language-hit-05", "category": "language", "lang": "es", "label": "hit", "split": "tuning", "a": "Dame una receta fácil de tortilla de patatas", "b": "¿Cómo se hace una tortilla de patatas fácil?"}
+{"id": "language-hit-06", "category": "language", "lang": "es", "label": "hit", "split": "held_out", "a": "¿Cuántas horas debe dormir un adulto?", "b": "¿Cuántas horas de sueño necesita un adulto?"}
+{"id": "language-miss-04", "category": "language", "lang": "es", "label": "miss", "split": "tuning", "a": "Dame tres ideas para una cena rápida", "b": "Dame cinco ideas para una cena rápida"}
+{"id": "language-miss-05", "category": "language", "lang": "es", "label": "miss", "split": "tuning", "a": "¿Debo tomar el medicamento antes de comer?", "b": "¿Debo tomar el medicamento después de comer?"}
+{"id": "language-miss-06", "category": "language", "lang": "es", "label": "miss", "split": "held_out", "a": "¿Cómo convierto grados Celsius a Fahrenheit?", "b": "¿Cómo convierto grados Fahrenheit a Celsius?"}
+{"id": "language-hit-07", "category": "language", "lang": "fr", "label": "hit", "split": "tuning", "a": "Quelle est la hauteur de la tour Eiffel ?", "b": "Combien mesure la tour Eiffel ?"}
+{"id": "language-hit-08", "category": "language", "lang": "fr", "label": "hit", "split": "tuning", "a": "Comment faire une pâte à crêpes ?", "b": "Quelle est la recette de la pâte à crêpes ?"}
+{"id": "language-hit-09", "category": "language", "lang": "fr", "label": "hit", "split": "held_out", "a": "Pourquoi le ciel est-il bleu ?", "b": "Pour quelle raison le ciel est bleu ?"}
+{"id": "language-miss-07", "category": "language", "lang": "fr", "label": "miss", "split": "tuning", "a": "Donne-moi deux exemples de verbes irréguliers", "b": "Donne-moi dix exemples de verbes irréguliers"}
+{"id": "language-miss-08", "category": "language", "lang": "fr", "label": "miss", "split": "tuning", "a": "Quels aliments sont riches en fer ?", "b": "Quels aliments ne sont pas riches en fer ?"}
+{"id": "language-miss-09", "category": "language", "lang": "fr", "label": "miss", "split": "held_out", "a": "Quel est le fuseau horaire de Paris en hiver ?", "b": "Quel est le fuseau horaire de Paris en été ?"}
+{"id": "language-hit-10", "category": "language", "lang": "de", "label": "hit", "split": "tuning", "a": "Wie lange muss ein Ei kochen, damit es weich ist?", "b": "Wie lange kocht man ein weiches Ei?"}
+{"id": "language-hit-11", "category": "language", "lang": "de", "label": "hit", "split": "tuning", "a": "Was ist die Hauptstadt von Kanada?", "b": "Wie heißt die Hauptstadt von Kanada?"}
+{"id": "language-hit-12", "category": "language", "lang": "de", "label": "hit", "split": "held_out", "a": "Wie kann ich besser einschlafen?", "b": "Was hilft mir, schneller einzuschlafen?"}
+{"id": "language-miss-10", "category": "language", "lang": "de", "label": "miss", "split": "tuning", "a": "Nenne drei Vorteile von Elektroautos", "b": "Nenne drei Nachteile von Elektroautos"}
+{"id": "language-miss-11", "category": "language", "lang": "de", "label": "miss", "split": "tuning", "a": "Wie viele Tage hat der Februar in einem Schaltjahr?", "b": "Wie viele Tage hat der Februar in einem normalen Jahr?"}
+{"id": "language-miss-12", "category": "language", "lang": "de", "label": "miss", "split": "held_out", "a": "Wann beginnt die Sommerzeit in Deutschland?", "b": "Wann endet die Sommerzeit in Deutschland?"}
+{"id": "language-hit-13", "category": "language", "lang": "zh", "label": "hit", "split": "tuning", "a": "中国的首都是哪里？", "b": "中国的首都是哪个城市？"}
+{"id": "language-hit-14", "category": "language", "lang": "zh", "label": "hit", "split": "tuning", "a": "怎么做番茄炒蛋？", "b": "番茄炒蛋的做法是什么？"}
+{"id": "language-hit-15", "category": "language", "lang": "zh", "label": "hit", "split": "held_out", "a": "每天应该喝多少水？", "b": "一天需要喝多少水？"}
+{"id": "language-miss-13", "category": "language", "lang": "zh", "label": "miss", "split": "tuning", "a": "推荐三本适合初学者的编程书", "b": "推荐五本适合初学者的编程书"}
+{"id": "language-miss-14", "category": "language", "lang": "zh", "label": "miss", "split": "tuning", "a": "北京到上海的高铁要多久？", "b": "北京到广州的高铁要多久？"}
+{"id": "language-miss-15", "category": "language", "lang": "zh", "label": "miss", "split": "held_out", "a": "这个药应该饭前吃吗？", "b": "这个药应该饭后吃吗？"}
+{"id": "language-hit-16", "category": "language", "lang": "hi-Latn", "label": "hit", "split": "tuning", "a": "India ki capital kya hai?", "b": "India ki rajdhani kya hai?"}
+{"id": "language-hit-17", "category": "language", "lang": "hi-Latn", "label": "hit", "split": "tuning", "a": "Chai kaise banate hain?", "b": "Chai banane ka tarika batao"}
+{"id": "language-hit-18", "category": "language", "lang": "hi-Latn", "label": "hit", "split": "held_out", "a": "Achhi neend ke liye kya karein?", "b": "Neend achhi kaise aaye?"}
+{"id": "language-miss-16", "category": "language", "lang": "hi-Latn", "label": "miss", "split": "tuning", "a": "Delhi se Mumbai ki train kab hai?", "b": "Mumbai se Delhi ki train kab hai?"}
+{"id": "language-miss-17", "category": "language", "lang": "hi-Latn", "label": "miss", "split": "tuning", "a": "Teen din mein Goa mein kya ghoomein?", "b": "Paanch din mein Goa mein kya ghoomein?"}
+{"id": "language-miss-18", "category": "language", "lang": "hi-Latn", "label": "miss", "split": "held_out", "a": "Kal Bangalore mein baarish hogi kya?", "b": "Aaj Bangalore mein baarish hogi kya?"}
+{"id": "language-miss-19", "category": "language", "lang": "cross", "label": "miss", "split": "tuning", "a": "What is the capital of France?", "b": "¿Cuál es la capital de Francia?"}
+{"id": "language-miss-20", "category": "language", "lang": "cross", "label": "miss", "split": "tuning", "a": "How do I boil an egg?", "b": "Wie koche ich ein Ei?"}
+{"id": "language-miss-21", "category": "language", "lang": "cross", "label": "miss", "split": "tuning", "a": "Give me tips for better sleep", "b": "बेहतर नींद के लिए सुझाव दीजिए"}
+{"id": "language-miss-22", "category": "language", "lang": "cross", "label": "miss", "split": "held_out", "a": "What is the weather like in Paris in spring?", "b": "Quel temps fait-il à Paris au printemps ?"}
+{"id": "language-hit-19", "category": "language", "lang": "en", "label": "hit", "split": "tuning", "a": "BTC price Q3?", "b": "BTC price in Q3?"}
+{"id": "language-hit-20", "category": "language", "lang": "en", "label": "hit", "split": "tuning", "a": "k8s pod restart loop fix", "b": "fix k8s pod restart loop"}
+{"id": "language-hit-21", "category": "language", "lang": "en", "label": "hit", "split": "tuning", "a": "SQL vs NoSQL?", "b": "SQL versus NoSQL?"}
+{"id": "language-hit-22", "category": "language", "lang": "en", "label": "hit", "split": "held_out", "a": "npm ERR ERESOLVE fix", "b": "how to fix npm ERR ERESOLVE"}
