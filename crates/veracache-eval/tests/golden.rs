@@ -48,12 +48,14 @@ fn missing_and_unknown_pairs_are_errors() {
 }
 
 // The number guards must beat. If this changes, the scores or pairs changed.
+// Language pairs are excluded: guards do not cover them, the language check does.
 #[test]
 fn threshold_only_baseline_is_pinned() {
     let pairs = loaded();
     let scores = load_scores(scores_path(), &pairs).unwrap();
     let mut counts = Counts::default();
-    for pair in pairs.iter().filter(|pair| pair.split == Split::Tuning) {
+    let phase_2 = |pair: &&Pair| pair.split == Split::Tuning && pair.category != "language";
+    for pair in pairs.iter().filter(phase_2) {
         counts.record(pair.label, scores[&pair.id] >= 0.90);
     }
     assert_eq!(counts.false_hits, 36);
@@ -139,7 +141,8 @@ fn direction_guard_stops_direction_false_hits_and_keeps_true_hits() {
     assert_eq!(guarded.correct_hits, plain.correct_hits);
 }
 
-const CATEGORIES: [&str; 8] = [
+const CATEGORIES: [&str; 9] = [
+    "language",
     "number",
     "date",
     "negation",
@@ -254,5 +257,52 @@ fn only_follow_ups_have_history_and_miss_pairs_differ() {
         } else if text(&pair, "label") == "miss" {
             assert_ne!(pair["a_history"], pair["b_history"], "{pair}");
         }
+    }
+}
+
+/// Languages the `language` category must cover. `hi-Latn` is romanized Hinglish.
+const LANGUAGES: [&str; 6] = ["hi", "es", "fr", "de", "zh", "hi-Latn"];
+
+#[test]
+fn only_language_pairs_name_a_language() {
+    for pair in pairs() {
+        let is_language = text(&pair, "category") == "language";
+        assert_eq!(pair["lang"].is_string(), is_language, "{pair}");
+        if is_language {
+            let lang = text(&pair, "lang");
+            let known = LANGUAGES.contains(&lang) || matches!(lang, "en" | "cross");
+            assert!(known, "{pair}");
+        }
+    }
+}
+
+#[test]
+fn every_language_has_both_labels_in_both_splits() {
+    let pairs = pairs();
+    for lang in LANGUAGES {
+        for label in ["hit", "miss"] {
+            for split in ["tuning", "held_out"] {
+                let found = pairs.iter().any(|p| {
+                    p["lang"] == lang && text(p, "label") == label && text(p, "split") == split
+                });
+                assert!(found, "{lang} {label} {split}");
+            }
+        }
+    }
+}
+
+// Cross-language pairs need answers in different languages, so they must miss.
+// English pairs are short or jargon-heavy true hits, to measure lost English recall.
+#[test]
+fn cross_language_pairs_miss_and_english_pairs_hit() {
+    let pairs = pairs();
+    for (lang, label) in [("cross", "miss"), ("en", "hit")] {
+        let tagged: Vec<_> = pairs.iter().filter(|p| p["lang"] == lang).collect();
+        assert!(tagged.len() >= 3, "{lang}");
+        assert!(tagged.iter().all(|p| text(p, "label") == label), "{lang}");
+        assert!(
+            tagged.iter().any(|p| text(p, "split") == "held_out"),
+            "{lang}"
+        );
     }
 }

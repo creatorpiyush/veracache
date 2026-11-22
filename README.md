@@ -2,7 +2,7 @@
 
 **A semantic cache for LLMs where a hit must be proven safe, not just similar.**
 
-> **Status: early development.** The core cache works as a Rust library, but it is not published and **only checks English prompts, so other languages can still return false hits. Do not use it for real answers yet.**
+> **Status: early development.** The core cache works as a Rust library, but it is not published and **only understands English: prompts in other languages get exact matches only. Do not use it for real answers yet.**
 
 ## The problem
 
@@ -83,7 +83,7 @@ ONNX Runtime has no prebuilt binaries for the last two rows. Build those targets
 
 ## Results
 
-False-hit results on the held-out golden split, which was run once after tuning: 48 pairs, 24 should-hit and 24 should-miss, at threshold 0.88 with bge-small-en-v1.5.
+False-hit results on the held-out golden split at threshold 0.88 with bge-small-en-v1.5: 62 pairs, 31 should-hit and 31 should-miss. The guard categories were run once after tuning the guards; the `language` category was added later and run once after tuning the language check.
 
 | Category | False-hit rate, threshold only | False-hit rate, guarded | Hit recall, threshold only | Hit recall, guarded |
 |---|---|---|---|---|
@@ -91,24 +91,27 @@ False-hit results on the held-out golden split, which was run once after tuning:
 | direction | 50.0% | 0.0% | 100.0% | 100.0% |
 | entity | 0.0% | 0.0% | 100.0% | 100.0% |
 | follow_up | 60.0% | 0.0% | 66.7% | 66.7% |
+| language | 62.5% | n/a, nothing served | 42.9% | 0.0% |
 | length | 0.0% | 0.0% | 100.0% | 100.0% |
 | negation | 50.0% | 0.0% | 100.0% | 66.7% |
 | number | 40.0% | 0.0% | 100.0% | 100.0% |
 | quote | 0.0% | 0.0% | 100.0% | 100.0% |
-| **All** | **36.1%** | **0.0%** | **95.8%** | **91.7%** |
+| **All** | **40.9%** | **0.0%** | **83.9%** | **71.0%** |
 
 Reproduce with `cargo run -p veracache-eval --example guarded held_out 0.88`.
 
-Read these numbers with care. The suite is small and self-authored, so 13 false hits stopped is not a production false-hit rate. At 0.88, similarity alone stops every entity, quote, and length false hit in this split, so it does not exercise those three guards. Run your own logs before trusting it; the eval CLI for that is Phase 3.
+Read these numbers with care. The suite is small and self-authored, so 18 false hits stopped is not a production false-hit rate. At 0.88, similarity alone stops every entity, quote, and length false hit in this split, so it does not exercise those three guards. Run your own logs before trusting it; the eval CLI for that is Phase 3.
+
+Prompts that are not English get exact matches only, because the guards only understand English. That is why `language` hit recall is 0%. Of its 7 should-hit pairs, similarity alone served 3, and the language check refuses all 3: a French and a Chinese paraphrase, refused on purpose, and "npm ERR ERESOLVE fix", short English jargon the check cannot recognize. Every other category has the same recall as before the language check.
 
 Lookup latency at 100k entries, from `cargo bench -p veracache --bench lookup`:
 
 | Bench | Mean |
 |---|---|
-| Exact hit | 1.3µs |
+| Exact hit | 1.5µs |
 | Semantic hit | 78µs |
 
-These are early numbers from an Apple M4 Pro, with synthetic vectors and a fake embedder. Semantic lookups run the default guards, but on two-word prompts, so real prompts will cost more.
+These are early numbers from an Apple M4 Pro, with synthetic vectors and a fake embedder. Semantic lookups run the language check and the default guards, but on four-word prompts, so real prompts will cost more.
 
 ## Roadmap
 

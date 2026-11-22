@@ -198,6 +198,9 @@ pub fn serves(
     let (Ok(stored), Ok(query)) = analyzed else {
         return false;
     };
+    if !stored.language.is_supported() || !query.language.is_supported() {
+        return false;
+    }
     guards
         .iter()
         .all(|guard| guard.check(&query, &stored).is_ok())
@@ -209,6 +212,28 @@ mod tests {
 
     const ROW: &str =
         r#"{"id":"x","category":"number","label":"hit","split":"tuning","a":"A","b":"B"}"#;
+
+    // Matches the pipeline: a semantic hit needs a supported language on both sides.
+    #[test]
+    fn unsupported_language_on_either_side_is_not_served() {
+        let pair = |a: &str, b: &str| Pair {
+            id: "x".into(),
+            category: "language".into(),
+            label: Label::Miss,
+            split: Split::Tuning,
+            a: a.into(),
+            b: b.into(),
+            a_history: None,
+            b_history: None,
+        };
+        let analyzer = veracache::EnglishAnalyzer;
+        let english = "What is the capital of France?";
+        let spanish = "¿Cuál es la capital de Francia?";
+        let same = pair(english, "What is the capital city of France?");
+        assert!(serves(&same, 0.99, 0.88, &analyzer, &[]));
+        assert!(!serves(&pair(english, spanish), 0.99, 0.88, &analyzer, &[]));
+        assert!(!serves(&pair(spanish, english), 0.99, 0.88, &analyzer, &[]));
+    }
 
     #[test]
     fn counts_each_outcome() {

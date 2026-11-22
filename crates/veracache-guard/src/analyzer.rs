@@ -3,11 +3,12 @@ use veracache_core::{Analyzed, Analyzer, Result};
 use crate::date::extract_dates;
 use crate::direction::extract_directions;
 use crate::entity::extract_entities;
+use crate::language::check_language;
 use crate::negation::extract_negations;
 use crate::number::extract_numbers;
 use crate::quote::extract_quotes;
 
-const FEATURE_VERSION: u32 = 1;
+const FEATURE_VERSION: u32 = 2;
 
 /// Extracts guard features from English prompts.
 #[derive(Debug, Clone, Copy, Default)]
@@ -30,6 +31,7 @@ impl Analyzer for EnglishAnalyzer {
             negations: extract_negations(text),
             directions: extract_directions(text),
             quotes,
+            language: check_language(text),
         })
     }
 }
@@ -43,6 +45,24 @@ mod tests {
         let analyzed = EnglishAnalyzer.analyze("hello world").unwrap();
         assert_eq!(analyzed.text, "hello world");
         assert_eq!(analyzed.feature_version, EnglishAnalyzer.feature_version());
+    }
+
+    #[test]
+    fn records_the_language_check() {
+        let english = EnglishAnalyzer.analyze("What is the capital of France?");
+        assert!(english.unwrap().language.is_supported());
+        let hindi = EnglishAnalyzer.analyze("भारत की राजधानी क्या है?").unwrap();
+        assert_eq!(
+            hindi.language,
+            veracache_core::LanguageCheck::NonLatinScript
+        );
+    }
+
+    // Entries stored before the language check have no language result, so
+    // they must be rejected instead of read as checked.
+    #[test]
+    fn feature_version_counts_the_language_check() {
+        assert_eq!(EnglishAnalyzer.feature_version(), 2);
     }
 
     #[test]

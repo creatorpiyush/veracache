@@ -8,8 +8,8 @@ use serde_json::Value;
 use crate::context::is_system;
 use crate::{
     Analyzed, Analyzer, CacheEntry, ChatMessage, ContextMode, Embedder, EntryId, EntryStats, Error,
-    Guard, Namespace, NamespaceParts, RejectReason, ResponseMeta, Result, VectorStore,
-    context_fingerprint, key_hash, normalize,
+    Guard, LanguageCheck, Namespace, NamespaceParts, RejectReason, ResponseMeta, Result,
+    VectorStore, context_fingerprint, key_hash, normalize,
 };
 
 /// Lookup settings.
@@ -101,6 +101,10 @@ pub enum Outcome {
     Miss,
     /// A cache failure, turned into a miss.
     Failed(String),
+    /// The query's language is not supported, so only the exact path ran.
+    /// No setting relaxes this: supporting a language means shipping its
+    /// analyzer.
+    Unsupported(LanguageCheck),
 }
 
 /// The record of one lookup. Holds no response bytes.
@@ -129,6 +133,7 @@ pub struct Cache {
     route_guards: HashMap<String, Vec<Arc<dyn Guard>>>,
     config: CacheConfig,
     errors: AtomicU64,
+    language_refusals: AtomicU64,
 }
 
 impl Cache {
@@ -148,6 +153,7 @@ impl Cache {
             route_guards: HashMap::new(),
             config,
             errors: AtomicU64::new(0),
+            language_refusals: AtomicU64::new(0),
         }
     }
 
@@ -227,6 +233,12 @@ impl Cache {
         self.errors.load(Ordering::Relaxed)
     }
 
+    /// Counts lookups whose query language was unsupported, so only the exact
+    /// path ran.
+    pub fn language_refusals(&self) -> u64 {
+        self.language_refusals.load(Ordering::Relaxed)
+    }
+
     fn key(&self, request: &CacheRequest<'_>) -> Option<Key> {
         let context = context_fingerprint(request.messages, self.config.context_mode)?;
         let prompt = request.messages.iter().rev().find(|m| !is_system(m))?;
@@ -273,6 +285,11 @@ impl Cache {
         }
 
         let query = self.analyzer.analyze(&key.normalized)?;
+        if !query.language.is_supported() {
+            self.language_refusals.fetch_add(1, Ordering::Relaxed);
+            decision.outcome = Outcome::Unsupported(query.language);
+            return Ok(None);
+        }
         let vector = self.embed(&key.normalized).await?;
         let candidates = self
             .store
@@ -323,6 +340,11 @@ impl Cache {
         };
         if features.feature_version != self.analyzer.feature_version() {
             return vec![RejectReason::new("features", "version mismatch")];
+        }
+        // Guards extract nothing from a language they don't cover, so they
+        // would pass it. The entry is still there for exact hits.
+        if !features.language.is_supported() {
+            return vec![RejectReason::new("language", features.language.to_string())];
         }
         guards
             .iter()
@@ -496,9 +518,16 @@ mod tests {
             if self.failing.load(Ordering::SeqCst) {
                 return Err(Error::Analyze("broken".into()));
             }
+            // "foreign" in a prompt stands in for a language guards don't cover.
+            let language = if text.contains("foreign") {
+                LanguageCheck::NonLatinScript
+            } else {
+                LanguageCheck::Supported
+            };
             Ok(Analyzed {
                 text: text.into(),
                 feature_version: self.feature_version(),
+                language,
                 ..Analyzed::default()
             })
         }
@@ -1167,5 +1196,75 @@ mod tests {
         assert_eq!(harness.embed_calls(), 0);
         assert!(harness.store.entries.lock().unwrap().is_empty());
         assert_eq!(harness.cache.error_count(), 0);
+    }
+
+    #[tokio::test]
+    async fn unsupported_query_skips_semantic_lookup() {
+        let harness = Harness::new(CacheConfig::default());
+        harness.set(&request(&[msg("user", "hello")])).await;
+        *harness.store.score.lock().unwrap() = 0.99;
+        assert_eq!(harness.embed_calls(), 1);
+
+        let query = [msg("user", "foreign hello")];
+        let (decision, hit) = harness.cache.decide(&request(&query)).await;
+
+        assert_eq!(hit, None);
+        assert_eq!(harness.embed_calls(), 1);
+        assert_eq!(
+            decision.outcome,
+            Outcome::Unsupported(LanguageCheck::NonLatinScript)
+        );
+        assert!(decision.candidates.is_empty());
+        assert_eq!(harness.cache.language_refusals(), 1);
+        assert_eq!(harness.cache.error_count(), 0);
+    }
+
+    #[tokio::test]
+    async fn unsupported_candidate_is_rejected() {
+        let harness = Harness::new(CacheConfig::default());
+        harness
+            .set(&request(&[msg("user", "foreign stored")]))
+            .await;
+        *harness.store.score.lock().unwrap() = 0.99;
+
+        let query = [msg("user", "query")];
+        let (decision, hit) = harness.cache.decide(&request(&query)).await;
+
+        assert_eq!(hit, None);
+        assert_eq!(decision.outcome, Outcome::Miss);
+        assert_eq!(
+            decision.candidates[0].rejects,
+            [RejectReason::new("language", "non-Latin script")]
+        );
+        assert_eq!(harness.cache.language_refusals(), 0);
+    }
+
+    #[tokio::test]
+    async fn unsupported_prompt_still_gets_exact_hits() {
+        let harness = Harness::new(CacheConfig::default());
+        let messages = [msg("user", "foreign hello")];
+        harness.set(&request(&messages)).await;
+
+        let hit = harness.cache.get(&request(&messages)).await.unwrap();
+
+        assert!(hit.exact);
+        assert_eq!(harness.cache.language_refusals(), 0);
+    }
+
+    // An analyzer that never ran the language check must not allow semantic hits.
+    #[tokio::test]
+    async fn unchecked_language_is_refused() {
+        let harness = Harness::new(CacheConfig::default());
+        harness.set(&request(&[msg("user", "hello")])).await;
+        *harness.store.score.lock().unwrap() = 0.99;
+        let mut entry = harness.store.only_entry();
+        entry.analyzed.as_mut().unwrap().language = LanguageCheck::NotChecked;
+        *harness.store.entries.lock().unwrap() = vec![entry];
+
+        let query = [msg("user", "query")];
+        let (decision, hit) = harness.cache.decide(&request(&query)).await;
+
+        assert_eq!(hit, None);
+        assert_eq!(decision.candidates[0].rejects[0].guard, "language");
     }
 }

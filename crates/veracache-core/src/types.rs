@@ -28,6 +28,63 @@ pub struct Analyzed {
     pub directions: Vec<String>,
     /// Quoted strings and code spans, sorted.
     pub quotes: Vec<String>,
+    /// Whether the guards cover this prompt's language.
+    pub language: LanguageCheck,
+}
+
+/// Whether a prompt is in a language the guards cover.
+///
+/// Only [`LanguageCheck::Supported`] allows a semantic hit. Every other value,
+/// including the default, means exact matches only.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum LanguageCheck {
+    /// No language check ran. Fails closed.
+    #[default]
+    NotChecked,
+    /// The guards cover this prompt's language.
+    Supported,
+    /// The prompt has a letter outside the Latin script.
+    NonLatinScript,
+    /// Too few words to tell the language.
+    TooShort {
+        /// Words in the prompt.
+        words: u32,
+    },
+    /// Not enough evidence that the prompt is English.
+    TooFewEnglishWords {
+        /// Words found in the English word list.
+        english: u32,
+        /// Words found in the non-English list or with non-ASCII letters.
+        foreign: u32,
+        /// Words in the prompt.
+        words: u32,
+    },
+}
+
+impl LanguageCheck {
+    /// True only when a semantic hit is allowed.
+    pub fn is_supported(self) -> bool {
+        self == Self::Supported
+    }
+}
+
+impl fmt::Display for LanguageCheck {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::NotChecked => f.write_str("language not checked"),
+            Self::Supported => f.write_str("supported language"),
+            Self::NonLatinScript => f.write_str("non-Latin script"),
+            Self::TooShort { words } => write!(f, "too short to tell language ({words} words)"),
+            Self::TooFewEnglishWords {
+                english,
+                foreign,
+                words,
+            } => write!(
+                f,
+                "too few English words ({english} English, {foreign} non-English, {words} words)"
+            ),
+        }
+    }
 }
 
 /// Why a guard rejected a candidate.

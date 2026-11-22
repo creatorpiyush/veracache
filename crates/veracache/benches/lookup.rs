@@ -62,12 +62,13 @@ impl Embedder for FixedEmbedder {
 }
 
 /// Spells `i` in letters, because digits in a prompt would trip `NumberGuard`.
+/// "what is" makes the prompt pass the English check, so semantic lookups run.
 fn label(prefix: &str, i: usize) -> String {
     let letters: String = format!("{i:06}")
         .bytes()
         .map(|digit| (digit - b'0' + b'a') as char)
         .collect();
-    format!("{prefix} {letters}")
+    format!("what is {prefix} {letters}")
 }
 
 fn messages(text: String) -> Vec<ChatMessage> {
