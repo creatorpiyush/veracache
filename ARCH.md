@@ -1,6 +1,6 @@
 # Architecture: veracache
 
-Status: partly built. The lookup pipeline with guards, the English language check, decision records, both embedders, and the memory store exist. Everything else here is design.
+Status: partly built. The lookup pipeline with guards, the English language check, decision records, both embedders, the memory store, and the `eval`, `replay`, and `inspect` commands exist. Everything else here is design.
 
 ## 1. Overview
 

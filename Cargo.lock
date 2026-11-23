@@ -2676,6 +2676,9 @@ dependencies = [
 name = "veracache-cli"
 version = "0.0.0"
 dependencies = [
+ "serde_json",
+ "tokio",
+ "veracache",
  "veracache-eval",
  "veracache-proxy",
 ]
@@ -2711,10 +2714,13 @@ dependencies = [
 name = "veracache-eval"
 version = "0.0.0"
 dependencies = [
+ "async-trait",
  "blake3",
+ "reqwest",
  "serde_json",
  "tokio",
  "veracache",
+ "wiremock",
 ]
 
 [[package]]

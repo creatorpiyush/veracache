@@ -39,11 +39,10 @@ If veracache cannot show a hit is safe, it treats it as a miss. A miss costs a l
 - **Remote embedding**: any OpenAI-compatible `/embeddings` API.
 - **In-memory store**: TTL, delete by tag or version, and an HNSW index for large namespaces.
 - **Fails open**: if the store or embedder fails, the request is a miss, not an error.
+- **Eval CLI**: `veracache eval` replays your own request log at many thresholds and recommends one for a target false-hit rate, as a table, JSON, or a self-contained HTML page. `veracache replay` and `veracache inspect` show how each request was decided.
 
 ## Planned
 
-- **Guarded matching**, with a recorded reason for every rejected candidate.
-- **Eval CLI**: replay your own logs to get hit rate, false-hit rate, and a recommended threshold before you trust it.
 - **OpenAI-compatible proxy**: a single binary that supports streaming. Point an existing client at it.
 - **Node and Python packages**, built on the same Rust core.
 - **More storage**: SQLite, Redis, pgvector.
@@ -68,6 +67,22 @@ MISS  How do I bake sourdough bread?
 ```
 
 See [paraphrase.rs](crates/veracache/examples/paraphrase.rs) for the API.
+
+### Evaluate your own traffic
+
+Write your requests as JSONL, one per line, with the response upstream gave:
+
+```json
+{"id": "r1", "model": "gpt-4o-mini", "messages": [{"role": "user", "content": "What is the capital of France?"}], "response": "Paris.", "usage": {"prompt_tokens": 14, "completion_tokens": 3}}
+```
+
+`id`, `tenant`, `model`, `tools`, `response_format`, and `usage` are optional. Then:
+
+```sh
+cargo run -p veracache-cli -- eval --input log.jsonl --labels labels.jsonl --format html > report.html
+```
+
+Each would-be hit is judged by your labels first (`{"a": "r1", "b": "r7", "label": "hit"}`), then by an LLM judge if you pass `--judge openai:<model>`, then by comparing the two logged responses. The report says which was used; the last is only an estimate. Try it on the bundled sample with `--input eval/datasets/sample/log.jsonl --labels eval/datasets/sample/labels.jsonl`, or on the golden suite with `--golden eval/datasets/golden.jsonl`. Run `cargo run -p veracache-cli -- --help` for every option.
 
 ### Platforms
 
@@ -100,7 +115,7 @@ False-hit results on the held-out golden split at threshold 0.88 with bge-small-
 
 Reproduce with `cargo run -p veracache-eval --example guarded held_out 0.88`.
 
-Read these numbers with care. The suite is small and self-authored, so 18 false hits stopped is not a production false-hit rate. At 0.88, similarity alone stops every entity, quote, and length false hit in this split, so it does not exercise those three guards. Run your own logs before trusting it; the eval CLI for that is Phase 3.
+Read these numbers with care. The suite is small and self-authored, so 18 false hits stopped is not a production false-hit rate. At 0.88, similarity alone stops every entity, quote, and length false hit in this split, so it does not exercise those three guards. Run your own logs through `veracache eval` before trusting it.
 
 Prompts that are not English get exact matches only, because the guards only understand English. That is why `language` hit recall is 0%. Of its 7 should-hit pairs, similarity alone served 3, and the language check refuses all 3: a French and a Chinese paraphrase, refused on purpose, and "npm ERR ERESOLVE fix", short English jargon the check cannot recognize. Every other category has the same recall as before the language check.
 
@@ -120,8 +135,8 @@ These are early numbers from an Apple M4 Pro, with synthetic vectors and a fake 
 | 0 | Workspace, CI, project skeleton | Done |
 | 1 | Core cache: exact and semantic lookup, embedders, memory store | Done |
 | 2 | Guard pipeline and golden test suite | Done |
-| 3 | Eval CLI | Next |
-| 4 | OpenAI-compatible proxy | Planned |
+| 3 | Eval CLI | Done |
+| 4 | OpenAI-compatible proxy | Next |
 | 5 | SQLite, Redis, and pgvector backends | Planned |
 | 6 | Node and Python packages | Planned |
 | 7 | Adaptive per-entry thresholds | Planned |
