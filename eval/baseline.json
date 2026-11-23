@@ -1,0 +1,29 @@
+{
+  "embedder": "bge-small-en-v1.5",
+  "false_hits": {
+    "0.80": {
+      "all": 0,
+      "date": 0,
+      "direction": 0,
+      "entity": 0,
+      "follow_up": 0,
+      "language": 0,
+      "length": 0,
+      "negation": 0,
+      "number": 0,
+      "quote": 0
+    },
+    "0.88": {
+      "all": 0,
+      "date": 0,
+      "direction": 0,
+      "entity": 0,
+      "follow_up": 0,
+      "language": 0,
+      "length": 0,
+      "negation": 0,
+      "number": 0,
+      "quote": 0
+    }
+  }
+}

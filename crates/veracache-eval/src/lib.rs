@@ -3,6 +3,14 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
+mod correctness;
+mod golden_log;
+mod judge;
+mod records;
+mod replay;
+mod report;
+mod sweep;
+
 use std::collections::HashMap;
 use std::error::Error;
 use std::path::Path;
@@ -14,6 +22,14 @@ use veracache::{Analyzer, Guard, normalize};
 
 /// Error type for loading evaluation data.
 pub type LoadError = Box<dyn Error + Send + Sync>;
+
+pub use correctness::{Correctness, Labels, Source, Verdict};
+pub use golden_log::golden_log;
+pub use judge::{JudgeConfig, LlmJudge};
+pub use records::{decision_text, outcome_name, replay_text, replayed_json};
+pub use replay::{LogRow, Replayed, Usage, load_log, parse_log, replay};
+pub use report::Report;
+pub use sweep::{Pricing, SweepPoint, recommend, sweep, thresholds};
 
 /// Whether a pair should share one cached answer.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

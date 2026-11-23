@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>veracache eval</title>
+<style>
+:root { --fg: #1d1d1f; --muted: #6e6e73; --bg: #ffffff; --line: #d2d2d7; --hit: #1f6feb; --fhr: #cf222e; --rec: #fff8c5; }
+@media (prefers-color-scheme: dark) { :root { --fg: #f5f5f7; --muted: #a1a1a6; --bg: #161618; --line: #3a3a3c; --hit: #58a6ff; --fhr: #ff7b72; --rec: #3b3417; } }
+body { font: 15px/1.5 system-ui, sans-serif; color: var(--fg); background: var(--bg); max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+h1 { font-size: 22px; margin: 0 0 4px; }
+h2 { font-size: 17px; margin: 28px 0 8px; }
+.meta, .warn { color: var(--muted); }
+.verdict { font-size: 17px; padding: 10px 14px; border-left: 4px solid var(--hit); }
+.verdict.none { border-color: var(--fhr); }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { padding: 4px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+tr.rec td { background: var(--rec); font-weight: 600; }
+dt { font-weight: 600; }
+dd { margin: 0 0 8px; }
+svg { width: 100%; height: auto; }
+.axis { stroke: var(--line); }
+.label { fill: var(--muted); font-size: 12px; }
+.hit { stroke: var(--hit); fill: none; stroke-width: 2; }
+.fhr { stroke: var(--fhr); fill: none; stroke-width: 2; }
+.mark { stroke: var(--muted); stroke-dasharray: 4 4; }
+</style>
+</head>
+<body>
+<h1>veracache eval</h1>
+<p class="meta">10 rows, embedder bge-small-en-v1.5, target FHR 1.0%</p>
+<p class="verdict ok">Recommended threshold: <strong>0.90</strong> (hit rate 30.0%, FHR 0.0%)</p>
+<svg viewBox="0 0 640 220" role="img" aria-label="Hit rate and false-hit rate by threshold">
+<line class="axis" x1="36" x2="604" y1="184.0" y2="184.0"/>
+<line class="axis" x1="36" x2="36" y1="36.0" y2="184.0"/>
+<text class="label" x="36" y="200.0">0.85</text>
+<text class="label" x="604" y="200.0" text-anchor="end">0.90</text>
+<text class="label" x="32" y="36.0" text-anchor="end">100%</text>
+<text class="label" x="32" y="184.0" text-anchor="end">0%</text>
+<line class="mark" x1="604.0" x2="604.0" y1="36.0" y2="184.0"/><polyline class="hit" points="36.0,110.0 604.0,139.6"/><polyline class="fhr" points="36.0,110.0 604.0,184.0"/>
+<line class="hit" x1="36" x2="56" y1="12" y2="12"/><text class="label" x="62" y="16">hit rate</text>
+<line class="fhr" x1="132" x2="152" y1="12" y2="12"/><text class="label" x="158" y="16">false-hit rate</text>
+</svg>
+<div class="scroll"><table>
+<thead><tr><th>Threshold</th><th>Hit rate</th><th>Exact</th><th>Semantic</th><th>False</th><th>FHR</th><th>Tokens saved</th><th>Cost saved</th></tr></thead>
+<tbody>
+<tr><td>0.85</td><td>50.0%</td><td>1</td><td>4</td><td>2</td><td>50.0%</td><td>500</td><td>$0.0009</td></tr>
+<tr class="rec"><td>0.90</td><td>30.0%</td><td>1</td><td>2</td><td>0</td><td>0.0%</td><td>500</td><td>$0.0009</td></tr>
+</tbody>
+</table></div>
+<h2>At 0.90</h2>
+<dl>
+<dt>Correctness</dt><dd>2 labelled</dd>
+<dt>Guard rejections</dt><dd>entity 2, language 1</dd>
+<dt>Language refusals</dt><dd>3</dd>
+</dl>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{"a": "france", "b": "france-paraphrase", "label": "hit"}
+{"a": "mars", "b": "jupiter", "label": "miss"}
+{"a": "sleep", "b": "sleep-paraphrase", "label": "hit"}
+{"a": "eggs", "b": "chicken", "label": "miss"}
+{"a": "usd-eur", "b": "eur-usd", "label": "miss"}
+{"a": "tcp-udp", "b": "tcp-udp-paraphrase", "label": "hit"}

@@ -10,8 +10,11 @@ repository.workspace = true
 
 [dependencies]
 blake3.workspace = true
+reqwest.workspace = true
 serde_json.workspace = true
 veracache.workspace = true
 
 [dev-dependencies]
+async-trait.workspace = true
 tokio = { workspace = true, features = ["macros", "rt"] }
+wiremock.workspace = true

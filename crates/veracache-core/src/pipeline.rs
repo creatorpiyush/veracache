@@ -233,6 +233,13 @@ impl Cache {
         self.errors.load(Ordering::Relaxed)
     }
 
+    /// The id an entry stored for `request` has, so callers can tie candidates
+    /// in a decision record back to their own records. `None` if the request
+    /// is not cacheable.
+    pub fn entry_id(&self, request: &CacheRequest<'_>) -> Option<EntryId> {
+        self.key(request).map(|key| entry_id(&key))
+    }
+
     /// Counts lookups whose query language was unsupported, so only the exact
     /// path ran.
     pub fn language_refusals(&self) -> u64 {
@@ -797,6 +804,18 @@ mod tests {
         };
         harness.set(&other_tenant).await;
         assert_ne!(harness.store.last_entry().id, first.id);
+    }
+
+    #[tokio::test]
+    async fn entry_id_names_the_entry_a_request_stores() {
+        let harness = Harness::new(CacheConfig::default());
+        let messages = [msg("user", "  hello\n world ")];
+        harness.set(&request(&messages)).await;
+        let stored = harness.store.only_entry();
+
+        assert_eq!(harness.cache.entry_id(&request(&messages)), Some(stored.id));
+        let follow_up = [msg("user", "a"), msg("assistant", "b"), msg("user", "c")];
+        assert_eq!(harness.cache.entry_id(&request(&follow_up)), None);
     }
 
     #[tokio::test]
